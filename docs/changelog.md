@@ -6,6 +6,19 @@ All notable changes to this project will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-03-07
+
+### Changed
+
+- Replace ExcelJS with SheetJS (xlsx) for XLSX parsing, eliminating deprecated transitive dependencies (rimraf, fstream, inflight, lodash.isequal, glob v7)
+
+### Fixed
+
+- Ensure `test/fixtures/` directory exists before creating test fixtures (fixes CI failure)
+- Fix `workflow_dispatch` trigger in docs workflow (remove invalid `branches` key)
+- Fix Node 22+ compatibility in release workflow (`require()` instead of `import()` with `assert`)
+- Update GitHub Pages deployment branch policy from `master` to `main`
+
 ## [0.1.0] - 2026-03-07
 
 ### Added
@@ -25,4 +38,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Progress bar with ETA
 - Auto-download of scc binary during `npm install` (skip with `SCC_SKIP_DOWNLOAD=1`)
 
+[0.1.1]: https://github.com/cesarandreslopez/occ/releases/tag/v0.1.1
 [0.1.0]: https://github.com/cesarandreslopez/occ/releases/tag/v0.1.0

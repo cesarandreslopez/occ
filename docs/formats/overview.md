@@ -8,7 +8,7 @@ OCC supports seven office document formats across three categories.
 |--------|-----------|:-----:|:-----:|:----------:|:------:|:----:|:-----:|:------:|---------------|
 | Word | `.docx` | Yes | Yes* | Yes | | | | | mammoth |
 | PDF | `.pdf` | Yes | Yes | | | | | | pdf-parse |
-| Excel | `.xlsx` | | | | Yes | Yes | Yes | | ExcelJS |
+| Excel | `.xlsx` | | | | Yes | Yes | Yes | | SheetJS/xlsx |
 | PowerPoint | `.pptx` | Yes | | | | | | Yes | JSZip + officeparser |
 | ODT | `.odt` | Yes | Yes* | Yes | | | | | officeparser |
 | ODS | `.ods` | | | | Yes | Yes | Yes | | JSZip + officeparser |

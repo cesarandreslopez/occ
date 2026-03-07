@@ -71,7 +71,7 @@ occ/
 │   │   ├── index.js        # Routes to format-specific parser
 │   │   ├── docx.js         # mammoth (words, pages, paragraphs)
 │   │   ├── pdf.js          # pdf-parse (words, pages)
-│   │   ├── xlsx.js         # ExcelJS (sheets, rows, cells)
+│   │   ├── xlsx.js         # SheetJS/xlsx (sheets, rows, cells)
 │   │   ├── pptx.js         # JSZip + officeparser (words, slides)
 │   │   └── odf.js          # JSZip + officeparser (odt/ods/odp)
 │   ├── stats.js            # Aggregation, sorting, column detection

@@ -30,7 +30,7 @@ bin/occ.js → src/cli.js (orchestrator)
                ├→ src/parsers/index.js — routes to format-specific parser
                │    ├→ parsers/docx.js — mammoth (words, pages, paragraphs)
                │    ├→ parsers/pdf.js  — pdf-parse (words, pages)
-               │    ├→ parsers/xlsx.js — ExcelJS (sheets, rows, cells)
+               │    ├→ parsers/xlsx.js — SheetJS/xlsx (sheets, rows, cells)
                │    ├→ parsers/pptx.js — JSZip + officeparser (words, slides)
                │    └→ parsers/odf.js  — JSZip + officeparser (odt/ods/odp)
                ├→ src/stats.js         — aggregation, sorting, column detection
