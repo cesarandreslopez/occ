@@ -1,20 +1,19 @@
-import ExcelJS from 'exceljs';
+import XLSX from 'xlsx';
 
 export async function parseXlsx(filePath) {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(filePath);
+  const workbook = XLSX.readFile(filePath);
 
-  const sheets = workbook.worksheets.length;
+  const sheets = workbook.SheetNames.length;
   let rows = 0;
   let cells = 0;
 
-  for (const worksheet of workbook.worksheets) {
-    rows += worksheet.actualRowCount || 0;
-    worksheet.eachRow((row) => {
-      row.eachCell(() => {
-        cells++;
-      });
-    });
+  for (const name of workbook.SheetNames) {
+    const sheet = workbook.Sheets[name];
+    const ref = sheet['!ref'];
+    if (!ref) continue;
+    const range = XLSX.utils.decode_range(ref);
+    rows += range.e.r - range.s.r + 1;
+    cells += (range.e.r - range.s.r + 1) * (range.e.c - range.s.c + 1);
   }
 
   return {

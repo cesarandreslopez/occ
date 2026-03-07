@@ -1,5 +1,5 @@
 import { Packer, Document, Paragraph, TextRun } from 'docx';
-import ExcelJS from 'exceljs';
+import XLSX from 'xlsx';
 import { writeFile, mkdir } from 'node:fs/promises';
 
 await mkdir('test/fixtures', { recursive: true });
@@ -22,17 +22,21 @@ async function createDocx() {
 
 // Create a small XLSX
 async function createXlsx() {
-  const workbook = new ExcelJS.Workbook();
-  const sheet1 = workbook.addWorksheet('Sheet1');
-  sheet1.addRow(['Name', 'Age', 'City']);
-  sheet1.addRow(['Alice', 30, 'NYC']);
-  sheet1.addRow(['Bob', 25, 'London']);
+  const workbook = XLSX.utils.book_new();
+  const sheet1 = XLSX.utils.aoa_to_sheet([
+    ['Name', 'Age', 'City'],
+    ['Alice', 30, 'NYC'],
+    ['Bob', 25, 'London'],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, sheet1, 'Sheet1');
 
-  const sheet2 = workbook.addWorksheet('Sheet2');
-  sheet2.addRow(['Product', 'Price']);
-  sheet2.addRow(['Widget', 9.99]);
+  const sheet2 = XLSX.utils.aoa_to_sheet([
+    ['Product', 'Price'],
+    ['Widget', 9.99],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, sheet2, 'Sheet2');
 
-  await workbook.xlsx.writeFile('test/fixtures/sample.xlsx');
+  XLSX.writeFile(workbook, 'test/fixtures/sample.xlsx');
   console.log('Created sample.xlsx');
 }
 

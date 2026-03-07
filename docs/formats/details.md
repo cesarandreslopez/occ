@@ -28,13 +28,13 @@ PDF is the only format that provides a true page count rather than an estimate.
 
 ## Excel (.xlsx)
 
-**Parser:** [ExcelJS](https://www.npmjs.com/package/exceljs)
+**Parser:** [SheetJS (xlsx)](https://www.npmjs.com/package/xlsx)
 
 **Metrics extracted:**
 
-- **Sheets** — `workbook.worksheets.length`
-- **Rows** — sum of `worksheet.actualRowCount` across all sheets
-- **Cells** — counted by iterating every cell in every row across all sheets
+- **Sheets** — `workbook.SheetNames.length`
+- **Rows** — derived from each sheet's `!ref` range
+- **Cells** — rows × columns derived from each sheet's `!ref` range
 
 Word and page counts are not extracted from spreadsheets.
 
