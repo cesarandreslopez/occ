@@ -35,7 +35,7 @@ jobs:
       - name: Verify package.json version matches tag
         run: |
           TAG="${{ steps.extract.outputs.version }}"
-          PKG_VERSION=$(node -e "import('./package.json', { assert: { type: 'json' } }).then(m => console.log(m.default.version))")
+          PKG_VERSION=$(node -p "require('./package.json').version")
           if [[ "$PKG_VERSION" != "$TAG" ]]; then
             echo "::error::package.json version ($PKG_VERSION) does not match tag (v$TAG)"
             exit 1
