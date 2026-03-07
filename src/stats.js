@@ -52,13 +52,7 @@ function aggregateByType(results, sort) {
     }
   }
 
-  const rows = Object.values(groups);
-  sortRows(rows, sort);
-
-  const totals = computeTotals(rows);
-  const columns = detectColumns(rows);
-
-  return { rows, totals, columns, mode: 'grouped' };
+  return finalize(Object.values(groups), sort, 'grouped');
 }
 
 function aggregateByFile(results, sort) {
@@ -84,12 +78,14 @@ function aggregateByFile(results, sort) {
     hasSlides: r.metrics?.slides != null,
   }));
 
-  sortRows(rows, sort);
+  return finalize(rows, sort, 'by-file');
+}
 
+function finalize(rows, sort, mode) {
+  sortRows(rows, sort);
   const totals = computeTotals(rows);
   const columns = detectColumns(rows);
-
-  return { rows, totals, columns, mode: 'by-file' };
+  return { rows, totals, columns, mode };
 }
 
 function sortRows(rows, sort) {

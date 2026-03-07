@@ -6,21 +6,20 @@ export function formatDocumentTable(stats, options = {}) {
   const { ci = false } = options;
   const c = ci ? noColor : colorize;
 
-  const headers = buildHeaders(stats.columns, stats.mode === 'by-file', c);
-  const colAligns = buildColAligns(stats.columns, stats.mode === 'by-file');
-  const chars = ci ? asciiChars() : unicodeChars();
+  const isByFile = stats.mode === 'by-file';
+  const headers = buildHeaders(stats.columns, isByFile, c);
+  const colAligns = buildColAligns(stats.columns, isByFile);
   const table = new Table({
     head: headers.map(h => h.label),
-    chars,
+    chars: tableChars(ci),
     style: { head: [], border: [] },
     colAligns,
   });
 
   for (const row of stats.rows) {
-    table.push(buildRow(row, stats.columns, stats.mode === 'by-file', c));
+    table.push(buildRow(row, stats.columns, isByFile, c));
   }
 
-  const isByFile = stats.mode === 'by-file';
   table.push(buildRow(stats.totals, stats.columns, isByFile, c, true));
 
   const tableStr = addSeparators(table.toString(), ci ? '-' : '─');
@@ -58,7 +57,7 @@ export function formatSccTable(sccData, options = {}) {
       c.headerCell('Comments'),
       c.headerCell('Code'),
     ],
-    chars: ci ? asciiChars() : unicodeChars(),
+    chars: tableChars(ci),
     style: { head: [], border: [] },
     colAligns: ['left', 'right', 'right', 'right', 'right', 'right'],
   });
@@ -183,17 +182,18 @@ function sectionHeader(title, width, ci = false) {
   return prefix + dash.repeat(padLen);
 }
 
+function hasExtraColumns(columns) {
+  return columns.hasParagraphs || columns.hasSheets || columns.hasSlides ||
+         columns.hasRows || columns.hasCells;
+}
+
 function buildHeaders(columns, byFile, c) {
   const headers = [];
   headers.push({ key: 'format', label: c.headerCell(byFile ? 'File' : 'Format') });
   if (!byFile) headers.push({ key: 'files', label: c.headerCell('Files') });
   if (columns.hasWords) headers.push({ key: 'words', label: c.headerCell('Words') });
   if (columns.hasPages) headers.push({ key: 'pages', label: c.headerCell('Pages') });
-
-  const hasExtra = columns.hasParagraphs || columns.hasSheets || columns.hasSlides ||
-                   columns.hasRows || columns.hasCells;
-  if (hasExtra) headers.push({ key: 'extra', label: c.headerCell('Details') });
-
+  if (hasExtraColumns(columns)) headers.push({ key: 'extra', label: c.headerCell('Details') });
   headers.push({ key: 'size', label: c.headerCell('Size') });
   return headers;
 }
@@ -203,11 +203,7 @@ function buildColAligns(columns, byFile) {
   if (!byFile) aligns.push('right'); // Files
   if (columns.hasWords) aligns.push('right');
   if (columns.hasPages) aligns.push('right');
-
-  const hasExtra = columns.hasParagraphs || columns.hasSheets || columns.hasSlides ||
-                   columns.hasRows || columns.hasCells;
-  if (hasExtra) aligns.push('right');
-
+  if (hasExtraColumns(columns)) aligns.push('right');
   aligns.push('right'); // Size
   return aligns;
 }
@@ -233,9 +229,7 @@ function buildRow(row, columns, byFile, c, isTotal = false) {
   if (columns.hasWords) cells.push(fmtNum(row.words ? formatNumber(row.words) : ''));
   if (columns.hasPages) cells.push(fmtNum(row.pages ? formatNumber(row.pages) : ''));
 
-  const hasExtra = columns.hasParagraphs || columns.hasSheets || columns.hasSlides ||
-                   columns.hasRows || columns.hasCells;
-  if (hasExtra) {
+  if (hasExtraColumns(columns)) {
     const parts = [];
     if (row.paragraphs) parts.push(`${formatNumber(row.paragraphs)} paras`);
     if (row.sheets) parts.push(`${formatNumber(row.sheets)} sheets`);
@@ -249,19 +243,11 @@ function buildRow(row, columns, byFile, c, isTotal = false) {
   return cells;
 }
 
-function unicodeChars() {
+function tableChars(ci) {
+  const ch = ci ? '-' : '─';
   return {
-    top: '─', 'top-mid': '─', 'top-left': '─', 'top-right': '─',
-    bottom: '─', 'bottom-mid': '─', 'bottom-left': '─', 'bottom-right': '─',
-    left: ' ', 'left-mid': '', mid: '', 'mid-mid': '',
-    right: ' ', 'right-mid': '', middle: '  ',
-  };
-}
-
-function asciiChars() {
-  return {
-    top: '-', 'top-mid': '-', 'top-left': '-', 'top-right': '-',
-    bottom: '-', 'bottom-mid': '-', 'bottom-left': '-', 'bottom-right': '-',
+    top: ch, 'top-mid': ch, 'top-left': ch, 'top-right': ch,
+    bottom: ch, 'bottom-mid': ch, 'bottom-left': ch, 'bottom-right': ch,
     left: ' ', 'left-mid': '', mid: '', 'mid-mid': '',
     right: ' ', 'right-mid': '', middle: '  ',
   };

@@ -15,18 +15,22 @@ const PARSER_MAP = {
   odp: parseOdf,
 };
 
+function failureResult(filePath, size, ext) {
+  return {
+    filePath,
+    size,
+    success: false,
+    fileType: EXTENSION_TO_TYPE[ext] || ext.toUpperCase(),
+    metrics: null,
+  };
+}
+
 export async function parseFile(filePath, size) {
   const ext = getExtension(filePath);
   const parser = PARSER_MAP[ext];
 
   if (!parser) {
-    return {
-      filePath,
-      size,
-      success: false,
-      fileType: EXTENSION_TO_TYPE[ext] || ext.toUpperCase(),
-      metrics: null,
-    };
+    return failureResult(filePath, size, ext);
   }
 
   try {
@@ -39,13 +43,7 @@ export async function parseFile(filePath, size) {
       metrics: result.metrics,
     };
   } catch {
-    return {
-      filePath,
-      size,
-      success: false,
-      fileType: EXTENSION_TO_TYPE[ext] || ext.toUpperCase(),
-      metrics: null,
-    };
+    return failureResult(filePath, size, ext);
   }
 }
 
