@@ -49,21 +49,23 @@ export async function parseFile(filePath, size) {
   }
 }
 
-export async function parseFiles(files, concurrency = 10) {
+export async function parseFiles(files, concurrency = 10, onProgress) {
   const results = [];
   for (let i = 0; i < files.length; i += concurrency) {
     const batch = files.slice(i, i + concurrency);
     const batchResults = await Promise.allSettled(
       batch.map(f => parseFile(f.path, f.size))
     );
-    for (const r of batchResults) {
+    for (let j = 0; j < batchResults.length; j++) {
+      const r = batchResults[j];
       results.push(r.status === 'fulfilled' ? r.value : {
-        filePath: batch[results.length - (i)]?.path,
+        filePath: batch[j]?.path,
         size: 0,
         success: false,
         fileType: 'Unreadable',
         metrics: null,
       });
+      if (onProgress) onProgress(1, batch[j]?.path);
     }
   }
   return results;

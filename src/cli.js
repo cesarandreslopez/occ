@@ -6,6 +6,7 @@ import { aggregate } from './stats.js';
 import { formatDocumentTable, formatSccTable } from './output/tabular.js';
 import { formatJson } from './output/json.js';
 import { checkScc, runScc } from './scc.js';
+import { createProgress } from './progress.js';
 
 export async function run(argv) {
   const program = new Command();
@@ -57,9 +58,12 @@ async function execute(directories, opts) {
     largeFileLimit: parseFloat(opts.largeFileLimit),
   });
 
+  const showProgress = opts.format !== 'json' && process.stderr.isTTY;
   let results = [];
   if (files.length > 0) {
-    results = await parseFiles(files);
+    const progress = createProgress({ total: files.length, label: 'Parsing', enabled: showProgress });
+    results = await parseFiles(files, 10, (inc, detail) => progress.update(inc, detail));
+    progress.done();
   }
 
   const stats = aggregate(results, {
@@ -70,6 +74,7 @@ async function execute(directories, opts) {
   // Run scc for code files
   let sccData = null;
   if (opts.code !== false) {
+    if (showProgress) process.stderr.write('\rAnalyzing code with scc...');
     sccData = await runScc(directories, {
       byFile: opts.byFile,
       excludeDir: excludeDirs,
@@ -77,6 +82,10 @@ async function execute(directories, opts) {
       ci: opts.ci,
       noGitignore: !opts.gitignore,
     });
+    if (showProgress) {
+      const cols = process.stderr.columns || 80;
+      process.stderr.write('\r' + ' '.repeat(cols) + '\r');
+    }
   }
 
   // Format output
