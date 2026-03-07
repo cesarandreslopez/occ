@@ -1,0 +1,83 @@
+site_name: OCC
+site_description: Office Cloc and Count — scc-style summary tables for office documents
+site_url: https://cesarandreslopez.github.io/occ/
+repo_url: https://github.com/cesarandreslopez/occ
+repo_name: cesarandreslopez/occ
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: JetBrains Mono
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+extra_css:
+  - overrides/assets/stylesheets/extra.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+  - overrides/assets/javascripts/mermaid-modal.js
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+  - Usage:
+    - CLI Reference: usage/cli-reference.md
+    - Output Formats: usage/output-formats.md
+    - Filtering: usage/filtering.md
+  - Supported Formats:
+    - Overview: formats/overview.md
+    - Format Details: formats/details.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Parser System: architecture/parsers.md
+    - scc Integration: architecture/scc-integration.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md

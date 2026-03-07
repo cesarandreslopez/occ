@@ -127,6 +127,15 @@ Total               23     3540      270       470     2800
 | `--large-file-limit <mb>` | Skip files over this size | `50` |
 | `--no-code` | Skip scc code analysis | off |
 
+## Documentation
+
+Full documentation is available at [cesarandreslopez.github.io/occ](https://cesarandreslopez.github.io/occ/), including:
+
+- [Installation](https://cesarandreslopez.github.io/occ/getting-started/installation/)
+- [Quick Start](https://cesarandreslopez.github.io/occ/getting-started/quick-start/)
+- [CLI Reference](https://cesarandreslopez.github.io/occ/usage/cli-reference/)
+- [Architecture](https://cesarandreslopez.github.io/occ/architecture/overview/)
+
 ## How It Works
 
 OCC uses [fast-glob](https://github.com/mrmlnc/fast-glob) for file discovery, dispatches to format-specific parsers (mammoth for DOCX, pdf-parse for PDF, ExcelJS for XLSX, JSZip + officeparser for PPTX/ODF), aggregates metrics, and renders output via cli-table3. For code metrics, it shells out to a vendored [scc](https://github.com/boyter/scc) binary (auto-downloaded during `npm install`, with PATH fallback).
