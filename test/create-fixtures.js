@@ -1,6 +1,8 @@
 import { Packer, Document, Paragraph, TextRun } from 'docx';
 import ExcelJS from 'exceljs';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
+
+await mkdir('test/fixtures', { recursive: true });
 
 // Create a small DOCX
 async function createDocx() {
