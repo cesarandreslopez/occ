@@ -1,6 +1,7 @@
 node_modules/
 vendor/
 site/
+contextful-tlap/
 test/fixtures/
 .claude/
 !.claude/commands/
