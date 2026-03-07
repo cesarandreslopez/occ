@@ -136,6 +136,24 @@ Full documentation is available at [cesarandreslopez.github.io/occ](https://cesa
 - [CLI Reference](https://cesarandreslopez.github.io/occ/usage/cli-reference/)
 - [Architecture](https://cesarandreslopez.github.io/occ/architecture/overview/)
 
+## Why OCC?
+
+Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases — lines, languages, complexity. But most projects also contain Word documents, PDFs, spreadsheets, and presentations that are invisible to these tools. OCC fills that gap.
+
+### For Humans
+
+- **Project audits** — instantly see how much documentation lives alongside your code: total word counts, page counts, spreadsheet sizes, and presentation lengths
+- **Tracking documentation growth** — run OCC in CI to monitor how documentation scales over time, catch bloat early, or enforce minimums
+- **Onboarding** — new team members get a quick sense of a project's documentation footprint before diving in
+- **Migration planning** — when moving to a new platform, know exactly what you're dealing with across hundreds of files and formats
+
+### For AI Agents
+
+- **Context budgeting** — LLMs have finite context windows. OCC's word and page counts let agents estimate how much of a document set they can ingest before hitting token limits
+- **Prioritization** — an agent deciding which documents to read can use OCC's JSON output to rank files by size, word count, or type, focusing on the most relevant content first
+- **Repository mapping** — agents exploring an unfamiliar codebase can run `occ --format json` to build a structured inventory of all non-code content alongside `scc` code metrics
+- **Pipeline integration** — JSON output pipes directly into agent toolchains for automated document analysis, summarization, or compliance checking
+
 ## How It Works
 
 OCC uses [fast-glob](https://github.com/mrmlnc/fast-glob) for file discovery, dispatches to format-specific parsers (mammoth for DOCX, pdf-parse for PDF, ExcelJS for XLSX, JSZip + officeparser for PPTX/ODF), aggregates metrics, and renders output via cli-table3. For code metrics, it shells out to a vendored [scc](https://github.com/boyter/scc) binary (auto-downloaded during `npm install`, with PATH fallback).

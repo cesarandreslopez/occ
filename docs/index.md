@@ -47,6 +47,24 @@ Total               23     3540      270       470     2800
 - **Progress bar** — with ETA for large scans
 - **Zero config** — auto-downloads scc binary on install, works out of the box
 
+## Why OCC?
+
+Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases — lines, languages, complexity. But most projects also contain Word documents, PDFs, spreadsheets, and presentations that are invisible to these tools. OCC fills that gap.
+
+### For Humans
+
+- **Project audits** — instantly see how much documentation lives alongside your code: total word counts, page counts, spreadsheet sizes, and presentation lengths
+- **Tracking documentation growth** — run OCC in CI to monitor how documentation scales over time, catch bloat early, or enforce minimums
+- **Onboarding** — new team members get a quick sense of a project's documentation footprint before diving in
+- **Migration planning** — when moving to a new platform, know exactly what you're dealing with across hundreds of files and formats
+
+### For AI Agents
+
+- **Context budgeting** — LLMs have finite context windows. OCC's word and page counts let agents estimate how much of a document set they can ingest before hitting token limits
+- **Prioritization** — an agent deciding which documents to read can use OCC's JSON output to rank files by size, word count, or type, focusing on the most relevant content first
+- **Repository mapping** — agents exploring an unfamiliar codebase can run `occ --format json` to build a structured inventory of all non-code content alongside `scc` code metrics
+- **Pipeline integration** — JSON output pipes directly into agent toolchains for automated document analysis, summarization, or compliance checking
+
 ## Quick Install
 
 ```bash
