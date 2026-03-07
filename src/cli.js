@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { findFiles } from './walker.js';
 import { parseFiles } from './parsers/index.js';
 import { aggregate } from './stats.js';
-import { formatDocumentTable, formatSccTable } from './output/tabular.js';
+import { formatDocumentTable, formatSccTable, formatSummaryLine } from './output/tabular.js';
 import { formatJson } from './output/json.js';
 import { checkScc, runScc } from './scc.js';
 import { createProgress } from './progress.js';
@@ -42,6 +42,7 @@ export async function run(argv) {
 }
 
 async function execute(directories, opts) {
+  const startTime = Date.now();
   const excludeDirs = opts.excludeDir
     ? opts.excludeDir.split(',').map(d => d.trim())
     : ['node_modules', '.git'];
@@ -111,6 +112,10 @@ async function execute(directories, opts) {
       if (files.length === 0) {
         parts.unshift('\nNo office documents found.');
       }
+
+      const elapsed = Date.now() - startTime;
+      const summary = formatSummaryLine(stats, sccData, elapsed, { ci: opts.ci });
+      if (summary) parts.push(summary);
     }
 
     if (skipped.length > 0) {
