@@ -1,3 +1,10 @@
 node_modules/
 vendor/
 test/fixtures/
+.claude/
+!.claude/commands/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
