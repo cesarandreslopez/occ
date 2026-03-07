@@ -11,26 +11,26 @@ occ docs/
 ```
 
 ```
--- Documents -----------------------------------------------------------
-Format        Files    Words    Pages    Extra          Size
---------------------------------------------------------------------
-Word             12   34,210      137    1,203 paras    1.2 MB
-PDF               8   22,540       64                   4.5 MB
-Excel             3                      12 sheets      890 KB
---------------------------------------------------------------------
-Total            23   56,750      201    1,203 paras    6.5 MB
---------------------------------------------------------------------
+-- Documents ---------------------------------------------------------------
+  Format    Files    Words    Pages                  Details      Size
+----------------------------------------------------------------------------
+  Word         12   34,210      137              1,203 paras    1.2 MB
+  PDF           8   22,540       64                             4.5 MB
+  Excel         3                                12 sheets      890 KB
+----------------------------------------------------------------------------
+  Total        23   56,750      201              1,203 paras    6.5 MB
 
--- Code (via scc) ------------------------------------------------------
-Language         Files    Lines   Blanks  Comments     Code
---------------------------------------------------------------------
-JavaScript          15     2340      180       320     1840
---------------------------------------------------------------------
-Total               15     2340      180       320     1840
---------------------------------------------------------------------
+-- Code (via scc) ----------------------------------------------------------
+  Language    Files    Lines   Blanks  Comments     Code
+----------------------------------------------------------------------------
+  JavaScript     15     2340      180       320     1840
+----------------------------------------------------------------------------
+  Total          15     2340      180       320     1840
+
+Scanned 23 documents (56,750 words, 201 pages) in 120ms
 ```
 
-Columns are auto-detected based on which metrics have data. For example, the "Extra" column combines paragraphs, sheets, rows, cells, and slides — only appearing when at least one format produces those metrics.
+Columns are auto-detected based on which metrics have data. For example, the "Details" column combines paragraphs, sheets, rows, cells, and slides — only appearing when at least one format produces those metrics.
 
 ## JSON Output
 
@@ -93,15 +93,14 @@ occ --by-file docs/
 ```
 
 ```
--- Documents -----------------------------------------------------------
-File              Words    Pages    Extra          Size
---------------------------------------------------------------------
-report.docx       5,200       21    82 paras       45 KB
-spec.pdf          3,100       12                   1.2 MB
-data.xlsx                            3 sheets      890 KB
---------------------------------------------------------------------
-Total (3 files)   8,300       33    82 paras       2.1 MB
---------------------------------------------------------------------
+-- Documents ---------------------------------------------------------------
+  File              Words    Pages              Details      Size
+----------------------------------------------------------------------------
+  report.docx       5,200       21             82 paras      45 KB
+  spec.pdf          3,100       12                          1.2 MB
+  data.xlsx                                    3 sheets     890 KB
+----------------------------------------------------------------------------
+  Total (3 files)   8,300       33             82 paras     2.1 MB
 ```
 
 In JSON mode with `--by-file`, each file entry includes `name` and `path` fields:

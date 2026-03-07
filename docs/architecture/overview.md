@@ -67,5 +67,5 @@ occ/
 - **ES modules** — the entire codebase uses native ES module syntax (`import`/`export`), set via `"type": "module"` in `package.json`
 - **No build step** — source files run directly via Node.js, no transpilation or bundling needed
 - **Batch concurrency** — files are parsed 10 at a time using chunked `Promise.allSettled` to balance throughput and memory usage
-- **Auto-detected columns** — the output table columns are determined dynamically based on which metrics actually have data (e.g., the "Extra" column only appears when paragraphs, sheets, or slides are present)
+- **Auto-detected columns** — the output table columns are determined dynamically based on which metrics actually have data (e.g., the "Details" column only appears when paragraphs, sheets, or slides are present)
 - **Vendored scc** — the scc binary is auto-downloaded during `npm install` for zero-config code metrics, with PATH fallback if the download fails
