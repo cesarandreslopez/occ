@@ -22,8 +22,6 @@ export function getExtension(filePath) {
   return path.extname(filePath).toLowerCase().replace('.', '');
 }
 
-export const OFFICE_EXTENSIONS = ['docx', 'xlsx', 'pptx', 'pdf', 'odt', 'ods', 'odp'];
-
 export const EXTENSION_TO_TYPE = {
   docx: 'Word',
   pdf: 'PDF',
@@ -33,3 +31,5 @@ export const EXTENSION_TO_TYPE = {
   ods: 'ODS',
   odp: 'ODP',
 };
+
+export const OFFICE_EXTENSIONS = Object.keys(EXTENSION_TO_TYPE);

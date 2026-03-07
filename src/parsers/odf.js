@@ -5,11 +5,12 @@ import { countWords, getExtension } from '../utils.js';
 
 export async function parseOdf(filePath) {
   const ext = getExtension(filePath);
-  const buffer = await readFile(filePath);
 
   if (ext === 'odt') return parseOdt(filePath);
-  if (ext === 'ods') return parseOds(filePath, buffer);
-  if (ext === 'odp') return parseOdp(filePath, buffer);
+
+  const buffer = await readFile(filePath);
+  if (ext === 'ods') return parseOds(buffer);
+  if (ext === 'odp') return parseOdp(buffer);
 
   throw new Error(`Unsupported ODF format: ${ext}`);
 }
@@ -34,7 +35,7 @@ async function parseOdt(filePath) {
   };
 }
 
-async function parseOds(filePath, buffer) {
+async function parseOds(buffer) {
   const zip = await JSZip.loadAsync(buffer);
   const contentXml = await zip.file('content.xml')?.async('text');
   if (!contentXml) throw new Error('No content.xml found in ODS');
@@ -42,8 +43,8 @@ async function parseOds(filePath, buffer) {
   const sheets = (contentXml.match(/<table:table /g) || []).length;
   const rows = (contentXml.match(/<table:table-row/g) || []).length;
 
-  // Use officeparser for cell text count
-  const text = await officeparser.parseOffice(filePath);
+  // Use officeparser with buffer to avoid re-reading from disk
+  const text = await officeparser.parseOffice(buffer);
   const cells = text.split(/\n/).filter(s => s.trim().length > 0).length;
 
   return {
@@ -60,14 +61,14 @@ async function parseOds(filePath, buffer) {
   };
 }
 
-async function parseOdp(filePath, buffer) {
+async function parseOdp(buffer) {
   const zip = await JSZip.loadAsync(buffer);
   const contentXml = await zip.file('content.xml')?.async('text');
   if (!contentXml) throw new Error('No content.xml found in ODP');
 
   const slides = (contentXml.match(/<draw:page /g) || []).length;
 
-  const text = await officeparser.parseOffice(filePath);
+  const text = await officeparser.parseOffice(buffer);
   const words = countWords(text);
 
   return {

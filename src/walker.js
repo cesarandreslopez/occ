@@ -30,17 +30,6 @@ export async function findFiles(directories, options = {}) {
 
   const ignore = excludeDir.map(d => `**/${d}/**`);
 
-  const paths = await fg(pattern, {
-    cwd: undefined,
-    absolute: true,
-    ignore,
-    dot: false,
-    onlyFiles: true,
-    followSymbolicLinks: false,
-    ...(directories.length > 0 ? {} : { cwd: process.cwd() }),
-  });
-
-  // If directories specified, search each one
   let allPaths = [];
   if (directories.length > 0) {
     for (const dir of directories) {

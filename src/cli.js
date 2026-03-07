@@ -1,5 +1,5 @@
-import { Command } from 'commander';
-import { writeFile } from 'node:fs/promises';
+import { Command, Option } from 'commander';
+import { readFile, writeFile } from 'node:fs/promises';
 import { findFiles } from './walker.js';
 import { parseFiles } from './parsers/index.js';
 import { aggregate } from './stats.js';
@@ -8,13 +8,15 @@ import { formatJson } from './output/json.js';
 import { checkScc, runScc } from './scc.js';
 import { createProgress } from './progress.js';
 
+const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+
 export async function run(argv) {
   const program = new Command();
 
   program
     .name('occ')
     .description('Office Cloc and Count — scc-style summary tables for office documents')
-    .version('0.1.0')
+    .version(pkg.version)
     .argument('[directories...]', 'directories to scan', [])
     .option('-f, --by-file', 'show a row per file instead of grouped by type')
     .option('--format <type>', 'output format: tabular or json', 'tabular')
@@ -22,7 +24,7 @@ export async function run(argv) {
     .option('--exclude-ext <exts>', 'comma-separated extensions to exclude')
     .option('--exclude-dir <dirs>', 'directories to skip (comma-separated)', 'node_modules,.git')
     .option('--no-gitignore', 'disable .gitignore respect')
-    .option('--sort <col>', 'sort by: files, name, words, size', 'files')
+    .addOption(new Option('--sort <col>', 'sort by: files, name, words, size').choices(['files', 'name', 'words', 'size']).default('files'))
     .option('-o, --output <file>', 'write output to file')
     .option('--ci', 'ASCII-only output, no colors')
     .option('--large-file-limit <mb>', 'skip files over this size in MB', '50')

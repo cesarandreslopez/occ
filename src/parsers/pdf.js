@@ -25,6 +25,7 @@ function beginSuppression() {
 function endSuppression() {
   if (--suppressionDepth === 0) {
     console.log = originalLog;
+    capturedWarnings.length = 0;
   }
 }
 
