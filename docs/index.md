@@ -9,64 +9,48 @@
 </p>
 
 <p align="center">
-  <strong>Office Cloc and Count</strong> — scc-style summary tables for office documents.
+  <strong>Office Cloc and Count</strong> — document metrics, structure extraction, and code exploration for real repositories.
 </p>
 
 ---
 
-OCC scans directories for office documents (DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP), extracts metrics like word counts, page counts, slide counts, and cell counts, and displays them in scc-style summary tables. When code files are also present, it auto-detects them and shells out to [scc](https://github.com/boyter/scc) for code metrics, printing both sections together.
+OCC now has two primary command families:
 
-```
--- Documents ---------------------------------------------------------------
-  Format    Files    Words    Pages                  Details      Size
-----------------------------------------------------------------------------
-  Word         12   34,210      137              1,203 paras    1.2 MB
-  PDF           8   22,540       64                             4.5 MB
-  Excel         3                                12 sheets      890 KB
-----------------------------------------------------------------------------
-  Total        23   56,750      201              1,203 paras    6.5 MB
+- `occ [directories...]` for office document metrics, structure extraction, and `scc` code metrics
+- `occ code ...` for on-demand repository exploration over an in-memory code graph
 
--- Code (via scc) ----------------------------------------------------------
-  Language    Files    Lines   Blanks  Comments     Code
-----------------------------------------------------------------------------
-  JavaScript     15     2340      180       320     1840
-  Python          8     1200       90       150      960
-----------------------------------------------------------------------------
-  Total          23     3540      270       470     2800
-
-Scanned 23 documents (56,750 words, 201 pages) in 120ms
-```
+The `0.3.0` release is strongest for **JavaScript, TypeScript, and Python** in the `occ code` path. It keeps the original document workflow intact and adds symbol search, call analysis, dependency inspection, inheritance queries, and ambiguity-aware chain reporting.
 
 ## Feature Highlights
 
-- **Office document metrics** — words, pages, paragraphs, slides, sheets, rows, cells
-- **Seven formats supported** — DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP
-- **Document structure extraction** — `--structure` parses heading hierarchy into a navigable tree with dotted section codes
-- **Code metrics via scc** — auto-detects code files and integrates scc output
-- **Multiple output modes** — grouped by type, per-file breakdown, or JSON
-- **CI-friendly** — ASCII-only, no-color mode for pipelines
-- **Flexible filtering** — include/exclude extensions, exclude directories, .gitignore-aware
-- **Progress bar** — with ETA for large scans
-- **Zero config** — auto-downloads scc binary on install, works out of the box
+- **Office document metrics** for DOCX, XLSX, PPTX, PDF, ODT, ODS, and ODP
+- **Document structure extraction** with `--structure`
+- **Code metrics via scc** during default scans
+- **Code exploration via `occ code`** with exact search, pattern search, content search, callers/callees, dependency categories, inheritance, and blocked-chain reporting
+- **Explicit relationship status** through `resolved`, `ambiguous`, and `unresolved`
+- **Dependency categorization** into local, external, and unresolved imports
+- **JSON-first automation support** across both command families
+- **Zero required services** for `occ code`; no database or daemon
 
 ## Why OCC?
 
-Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases — lines, languages, complexity. But most projects also contain Word documents, PDFs, spreadsheets, and presentations that are invisible to these tools. OCC fills that gap.
+Tools like `scc`, `cloc`, and `tokei` give you fast visibility into code. OCC extends that visibility to the rest of the repository:
+
+- office documents that usually sit outside engineering metrics
+- document structure that is useful for navigation and RAG pipelines
+- repository code relationships that are useful for interactive exploration and agent workflows
 
 ### For Humans
 
-- **Project audits** — instantly see how much documentation lives alongside your code: total word counts, page counts, spreadsheet sizes, and presentation lengths
-- **Tracking documentation growth** — run OCC in CI to monitor how documentation scales over time, catch bloat early, or enforce minimums
-- **Onboarding** — new team members get a quick sense of a project's documentation footprint before diving in
-- **Migration planning** — when moving to a new platform, know exactly what you're dealing with across hundreds of files and formats
+- **Project audits** — quantify documentation footprint alongside source code
+- **Migration planning** — quickly find both the documents and the symbols that matter
+- **Onboarding** — scan a repo once, then drill into specific classes, functions, and dependencies
 
 ### For AI Agents
 
-- **Context budgeting** — LLMs have finite context windows. OCC's word and page counts let agents estimate how much of a document set they can ingest before hitting token limits
-- **Prioritization** — an agent deciding which documents to read can use OCC's JSON output to rank files by size, word count, or type, focusing on the most relevant content first
-- **RAG chunk mapping** — `--structure --format json` outputs heading trees with character offsets, enabling chunk-to-section mapping, scoped retrieval, and citation paths in RAG pipelines
-- **Repository mapping** — agents exploring an unfamiliar codebase can run `occ --format json` to build a structured inventory of all non-code content alongside `scc` code metrics
-- **Pipeline integration** — JSON output pipes directly into agent toolchains for automated document analysis, summarization, or compliance checking
+- **Context budgeting** — estimate document volume before ingestion
+- **Repository mapping** — combine `occ --format json` for document inventory with `occ code ... --format json` for symbol and relationship data
+- **RAG chunk mapping** — use `--structure --format json` to recover section boundaries and character offsets
 
 ## Quick Install
 
@@ -79,9 +63,32 @@ occ
 npx @cesarandreslopez/occ docs/ reports/
 ```
 
+## Quick Examples
+
+```bash
+# Document metrics + scc summary
+occ docs/
+
+# Document structure
+occ --structure docs/
+
+# Exact symbol lookup
+occ code find name UserService --path .
+
+# Inspect outgoing calls with ambiguity reporting
+occ code analyze calls ambiguousCaller --path test/fixtures/code-explore
+
+# Dependency inspection with local/external/unresolved grouping
+occ code analyze deps src/deps --path test/fixtures/code-explore
+
+# Call chain that reports blocked ambiguity
+occ code analyze chain ambiguousCaller duplicate --path test/fixtures/code-explore
+```
+
 ## Next Steps
 
-- [Installation](getting-started/installation.md) — all install methods
-- [Quick Start](getting-started/quick-start.md) — first-run walkthrough
-- [CLI Reference](usage/cli-reference.md) — every flag explained
-- [Architecture](architecture/overview.md) — how it all fits together
+- [Installation](getting-started/installation.md) — install methods and runtime notes
+- [Quick Start](getting-started/quick-start.md) — first-run walkthrough for both command families
+- [CLI Reference](usage/cli-reference.md) — full command and flag reference
+- [Output Formats](usage/output-formats.md) — tabular and JSON payloads
+- [Architecture](architecture/overview.md) — document pipeline and code graph internals

@@ -41,3 +41,12 @@ export type MetricField = typeof METRIC_FIELDS[number];
 export function hasKey(field: string): string {
   return `has${field[0].toUpperCase()}${field.slice(1)}`;
 }
+
+export async function writeStream(stream: NodeJS.WritableStream, text: string): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    stream.write(text, (error?: Error | null) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+}

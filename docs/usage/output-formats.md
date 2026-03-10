@@ -4,7 +4,7 @@ OCC supports two output formats: tabular (default) and JSON.
 
 ## Tabular Output (Default)
 
-The default output renders two cli-table3 tables: one for documents and one for code.
+For the default `occ [directories...]` command, OCC renders terminal tables for document metrics and, when available, `scc` code metrics. If `--structure` is enabled, structure sections are appended after those tables.
 
 ```bash
 occ docs/
@@ -30,7 +30,7 @@ occ docs/
 Scanned 23 documents (56,750 words, 201 pages) in 120ms
 ```
 
-Columns are auto-detected based on which metrics have data. For example, the "Details" column combines paragraphs, sheets, rows, cells, and slides — only appearing when at least one format produces those metrics.
+Columns are auto-detected based on which metrics have data. For example, the "Details" column combines paragraphs, sheets, rows, cells, and slides and only appears when at least one format produces those metrics.
 
 ## JSON Output
 
@@ -82,7 +82,7 @@ occ --format json docs/
 }
 ```
 
-The `documents` section always contains `files` (array of per-type or per-file entries) and `totals`. The `code` section is the raw scc JSON output, only present when code files are found.
+The `documents` section always contains `files` (array of per-type or per-file entries) and `totals`. The `code` section is the raw `scc` JSON output and is only present when code files are found and `scc` is available.
 
 When `--structure` is used, an additional `structures` key appears:
 
@@ -186,4 +186,190 @@ occ --output report.txt docs/
 
 # JSON to file
 occ --format json -o report.json docs/
+```
+
+## Code Exploration Tabular Output
+
+`occ code` prints command-specific terminal output instead of the document summary tables. The exact layout depends on the query, but the semantics are consistent:
+
+- relationship queries show `resolved`, `ambiguous`, or `unresolved`
+- ambiguous calls include candidate hints when available
+- dependency analysis is split into importer, local, external, and unresolved sections
+- chain analysis explains when a path is blocked by ambiguity
+
+### Ambiguous Calls
+
+```bash
+occ code analyze calls ambiguousCaller --path test/fixtures/code-explore
+```
+
+```
+-- Outgoing Calls: ambiguousCaller ----------------------------------------
+  Callee       Location    Resolution    Detail
+  duplicate                ambiguous     2 candidates: src/duplicate-a.ts:1, src/duplicate-b.ts:1
+```
+
+### Blocked Chains
+
+```bash
+occ code analyze chain ambiguousCaller duplicate --path test/fixtures/code-explore
+```
+
+```
+Chain 1 (blocked by ambiguity)
+ambiguousCaller (src/ambiguous.ts:1)
+blocked by ambiguous call "duplicate" at line 2: src/duplicate-a.ts:1, src/duplicate-b.ts:1
+```
+
+### Dependency Categories
+
+```bash
+occ code analyze deps src/deps --path test/fixtures/code-explore
+```
+
+```
+Repository: src/deps.ts
+
+-- Local Imports ----------------------------------------------------------
+  Local Module    Resolution    Specifier
+  src/utils       resolved      ./utils
+
+-- External Imports -------------------------------------------------------
+  External Package    Resolution    Specifier
+  node:path           resolved      node:path
+
+-- Unresolved Imports -----------------------------------------------------
+  Unresolved Import    Resolution    Specifier
+  ./missing            unresolved    ./missing
+```
+
+## Code Exploration JSON
+
+`occ code` uses a command-oriented JSON envelope so both humans and agents can rely on a stable top-level shape:
+
+```bash
+occ code find name Greeter --path test/fixtures/code-explore --format json
+```
+
+```json
+{
+  "repo": "/path/to/repo",
+  "query": {
+    "command": "code.find.name",
+    "value": "Greeter"
+  },
+  "results": [
+    {
+      "node": {
+        "id": "class:/path/to/repo/python/helpers.py:Greeter:5",
+        "type": "class",
+        "name": "Greeter",
+        "relativePath": "python/helpers.py",
+        "line": 5,
+        "language": "python"
+      }
+    }
+  ],
+  "stats": {
+    "filesIndexed": 17,
+    "nodes": 70,
+    "edges": 89
+  },
+  "capabilities": {
+    "python": {
+      "definitions": true,
+      "imports": true,
+      "calls": true,
+      "inheritance": true,
+      "content": true
+    },
+    "typescript": {
+      "definitions": true,
+      "imports": true,
+      "calls": true,
+      "inheritance": true,
+      "content": true
+    }
+  }
+}
+```
+
+The `query` object identifies the command variant. `results` varies by command, but the top-level `repo`, `stats`, and `capabilities` keys stay stable across the `occ code` command family.
+
+Notable `occ code` JSON behaviors:
+
+- **Call edges** include `status` and may include `candidates` when a target is ambiguous
+- **Dependency analysis** returns separate `localImports`, `externalImports`, and `unresolvedImports`
+- **Call chains** may return `status: "blocked_ambiguous"` with `blockedAt` and `blockedBy` metadata
+
+### Ambiguous Call Edge Example
+
+```json
+{
+  "edge": {
+    "type": "calls",
+    "status": "ambiguous",
+    "targetName": "duplicate",
+    "candidates": [
+      { "name": "duplicate", "relativePath": "src/duplicate-a.ts", "line": 1 },
+      { "name": "duplicate", "relativePath": "src/duplicate-b.ts", "line": 1 }
+    ]
+  }
+}
+```
+
+### Blocked Chain Example
+
+```json
+{
+  "status": "blocked_ambiguous",
+  "blockedAt": {
+    "name": "ambiguousCaller",
+    "relativePath": "src/ambiguous.ts",
+    "line": 1
+  },
+  "blockedBy": {
+    "targetName": "duplicate",
+    "line": 2,
+    "status": "ambiguous"
+  }
+}
+```
+
+### Dependency Analysis Example
+
+```json
+{
+  "results": {
+    "target": "src/deps",
+    "importers": [],
+    "localImports": [
+      {
+        "edge": {
+          "specifier": "./utils",
+          "status": "resolved",
+          "importKind": "local"
+        }
+      }
+    ],
+    "externalImports": [
+      {
+        "edge": {
+          "specifier": "node:path",
+          "status": "resolved",
+          "importKind": "external"
+        }
+      }
+    ],
+    "unresolvedImports": [
+      {
+        "edge": {
+          "specifier": "./missing",
+          "status": "unresolved",
+          "importKind": "unresolved"
+        }
+      }
+    ]
+  }
+}
 ```

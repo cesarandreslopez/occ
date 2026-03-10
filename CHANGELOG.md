@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-10
+
+### Added
+
+- `occ code` command family for on-demand code exploration
+- First-class JavaScript, TypeScript, and Python exploration support
+- Automated fixture-based tests for code graph queries and output contracts
+
+### Changed
+
+- Improved call resolution for `this`, `super`, `self`, `cls`, and imported aliases
+- Ambiguous calls and blocked call chains now surface candidate locations
+- Dependency analysis now separates local, external, and unresolved imports
+
 ## [0.2.0] - 2026-03-09
 
 ### Added
@@ -81,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Progress bar with ETA
 - Auto-download of scc binary during `npm install` (skip with `SCC_SKIP_DOWNLOAD=1`)
 
+[0.3.0]: https://github.com/cesarandreslopez/occ/releases/tag/v0.3.0
 [0.2.0]: https://github.com/cesarandreslopez/occ/releases/tag/v0.2.0
 [0.1.2]: https://github.com/cesarandreslopez/occ/releases/tag/v0.1.2
 [0.1.1]: https://github.com/cesarandreslopez/occ/releases/tag/v0.1.1

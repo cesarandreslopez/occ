@@ -1,6 +1,8 @@
 # scc Integration
 
-OCC uses [scc](https://github.com/boyter/scc) (Succinct Code Counter) for code metrics. The integration is implemented in `src/scc.ts`. This page explains how scc is found, invoked, and integrated.
+OCC uses [scc](https://github.com/boyter/scc) (Succinct Code Counter) for code metrics in the default `occ [directories...]` scan flow. The integration is implemented in `src/scc.ts`.
+
+`occ code` does not use `scc`. Code exploration builds its own in-memory graph and has separate behavior, output, and language support.
 
 ## Binary Resolution
 

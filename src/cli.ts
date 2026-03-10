@@ -12,11 +12,12 @@ import { createProgress } from './progress.js';
 import { documentToMarkdown } from './markdown/convert.js';
 import { extractFromMarkdown } from './structure/index.js';
 import { formatStructureTree, formatStructureJson } from './output/tree.js';
+import { registerCodeCommands } from './code/command.js';
 import type { StructureResult } from './output/tree.js';
 import type { ParseResult } from './types.js';
 import type { FileEntry } from './types.js';
 import type { SccLanguage } from './scc.js';
-import { getExtension } from './utils.js';
+import { getExtension, writeStream } from './utils.js';
 
 interface CliOptions {
   byFile?: boolean;
@@ -69,10 +70,12 @@ export async function run(argv: string[]) {
         await execute(directories, opts);
       } catch (err: unknown) {
         const error = err as Error;
-        process.stderr.write(`Error: ${error.message}\n`);
+        await writeStream(process.stderr, `Error: ${error.message}\n`);
         process.exit(1);
       }
     });
+
+  registerCodeCommands(program);
 
   await program.parseAsync(argv);
 }
@@ -218,6 +221,6 @@ async function execute(directories: string[], opts: CliOptions) {
   if (opts.output) {
     await writeFile(opts.output, output);
   } else {
-    process.stdout.write(output);
+    await writeStream(process.stdout, output);
   }
 }

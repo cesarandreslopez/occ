@@ -1,5 +1,10 @@
 # Quick Start
 
+OCC has two entry points:
+
+- `occ [directories...]` for document scanning and `scc` code metrics
+- `occ code ...` for repository exploration against a code graph
+
 ## Your First Scan
 
 Run OCC on any directory containing office documents:
@@ -8,11 +13,24 @@ Run OCC on any directory containing office documents:
 occ docs/
 ```
 
-OCC will discover all supported files (DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP), extract metrics, and display a summary table.
+OCC will discover all supported document files (DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP), extract metrics, and display a summary table. If code is present and `scc` is available, the scan also includes a code metrics section.
+
+## Your First Code Query
+
+Use the `occ code` namespace for on-demand code exploration:
+
+```bash
+occ code find name UserService --path .
+occ code analyze calls bootstrap --path .
+```
+
+Unlike the default scan command, `occ code` targets a repository root with `--path` instead of positional directories.
+
+The strongest support path in `0.3.0` is **JavaScript, TypeScript, and Python**. The code graph is built in memory for each command; there is no database or background service to start.
 
 ## Understanding the Output
 
-OCC produces up to three sections:
+For the default `occ` scan command, OCC can produce up to three sections:
 
 **Documents** — metrics from office files, grouped by format:
 
@@ -27,7 +45,7 @@ OCC produces up to three sections:
   Total        23   56,750      201              1,203 paras    6.5 MB
 ```
 
-**Code (via scc)** — if code files are found, scc metrics appear automatically:
+**Code (via scc)** — if code files are found and `scc` is available, code metrics appear automatically:
 
 ```
 -- Code (via scc) ----------------------------------------------------------
@@ -50,6 +68,28 @@ OCC produces up to three sections:
 3   Results ................................................ p.6-8
 
 3 sections, 6 nodes, max depth 2
+```
+
+For `occ code`, OCC prints command-specific tables or JSON envelopes instead of the document summary. For example:
+
+```bash
+occ code analyze deps src/deps --path test/fixtures/code-explore
+```
+
+```
+Repository: src/deps.ts
+
+-- Local Imports ----------------------------------------------------------
+  Local Module    Resolution    Specifier
+  src/utils       resolved      ./utils
+
+-- External Imports -------------------------------------------------------
+  External Package    Resolution    Specifier
+  node:path           resolved      node:path
+
+-- Unresolved Imports -----------------------------------------------------
+  Unresolved Import    Resolution    Specifier
+  ./missing            unresolved    ./missing
 ```
 
 ## Key Flags to Try
@@ -78,6 +118,18 @@ occ --include-ext pdf,docx docs/
 
 # Scan multiple directories
 occ docs/ reports/ specs/
+
+# Find code by exact name
+occ code find name Greeter --path test/fixtures/code-explore
+
+# Narrow an exact name lookup to one file
+occ code find name duplicate --path test/fixtures/code-explore --file src/duplicate-a.ts
+
+# Inspect dependency categories
+occ code analyze deps python/deps --path test/fixtures/code-explore
+
+# Show a chain blocked by ambiguity
+occ code analyze chain ambiguousCaller duplicate --path test/fixtures/code-explore
 ```
 
 !!! tip "Scan the current directory"
@@ -90,5 +142,6 @@ occ docs/ reports/ specs/
 
 - [CLI Reference](../usage/cli-reference.md) — every flag explained with examples
 - [Output Formats](../usage/output-formats.md) — tabular, JSON, and file output
-- [Filtering](../usage/filtering.md) — include/exclude extensions and directories
+- [Filtering](../usage/filtering.md) — document-scan filters and `occ code` repo exclusions
+- [Architecture](../architecture/overview.md) — default scan and `occ code` internals
 - [Supported Formats](../formats/overview.md) — what metrics each format provides

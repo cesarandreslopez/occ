@@ -15,6 +15,7 @@ git clone https://github.com/cesarandreslopez/occ.git
 cd occ
 npm install
 npm run build
+npm test
 ```
 
 ### Verify Setup
@@ -30,6 +31,7 @@ node dist/bin/occ.js test/fixtures/
 npm run build                    # Compile TypeScript → dist/
 npm run dev                      # Run via tsx (no build needed)
 npm start                        # Run compiled output (node dist/bin/occ.js)
+npm test                         # Build + run the Node test suite
 npm install                      # Install deps + auto-download scc binary
 npm link                         # Make `occ` available globally
 
@@ -42,6 +44,12 @@ node dist/bin/occ.js --format json test/fixtures/
 node dist/bin/occ.js --ci test/fixtures/
 node dist/bin/occ.js --by-file test/fixtures/
 node dist/bin/occ.js --structure test/fixtures/
+
+# Verify code exploration
+node dist/bin/occ.js code find name Greeter --path test/fixtures/code-explore
+node dist/bin/occ.js code analyze callers createUser --path test/fixtures/code-explore
+node dist/bin/occ.js code analyze deps src/deps --path test/fixtures/code-explore
+node dist/bin/occ.js code analyze chain ambiguousCaller duplicate --path test/fixtures/code-explore
 ```
 
 ## Code Style
@@ -49,14 +57,15 @@ node dist/bin/occ.js --structure test/fixtures/
 - TypeScript with strict mode — all source under `src/` and `bin/` as `.ts`
 - ES modules (`"type": "module"`) throughout
 - `npm run build` compiles to `dist/`; `npx tsx` for dev without building
-- No test runner or linter configured yet — contributions to add these are welcome
+- The test suite uses Node's built-in test runner via `tsx`
+- Docs changes should keep the root README, `CONTRIBUTING.md`, and the `docs/` mirror consistent
 - [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
 
 ## Making Changes
 
 1. Create a feature branch from `main`
 2. Make your changes with clear commits
-3. Ensure `npm run build && node dist/bin/occ.js test/fixtures/` runs successfully
+3. Ensure `npm test` and the relevant CLI smoke commands run successfully
 4. Update documentation if needed
 5. Submit a PR with a clear description
 
@@ -69,7 +78,8 @@ node dist/bin/occ.js --structure test/fixtures/
 
 ## Areas for Contribution
 
-- Test framework setup and test coverage
+- Additional JS/TS and Python code exploration coverage
+- Document parsing edge cases and structure extraction coverage
 - New output formats (CSV, HTML)
 - Additional document format support
 - Performance improvements for large directories

@@ -1,5 +1,9 @@
 # Supported Formats
 
+This page covers the document formats supported by the default `occ [directories...]` scan flow.
+
+For `occ code` language support, see the [CLI Reference](../usage/cli-reference.md). In `0.3.0`, the strongest code exploration support path is JavaScript, TypeScript, and Python.
+
 OCC supports seven office document formats across three categories.
 
 ## Format Summary

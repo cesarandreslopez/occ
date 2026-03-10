@@ -1,6 +1,11 @@
 # Filtering
 
-OCC provides several mechanisms to control which files are scanned.
+OCC has two filtering models:
+
+- the default `occ [directories...]` scan flow, which filters document discovery
+- the `occ code` flow, which filters repository code discovery
+
+Some flags overlap, but they are not identical.
 
 ## Extension Filtering
 
@@ -72,3 +77,20 @@ When files are skipped, OCC reports the count at the bottom of the output:
 ```
 3 file(s) skipped (use --large-file-limit to adjust)
 ```
+
+## `occ code` Filtering
+
+`occ code` does not use `--include-ext`, `--exclude-ext`, or `--large-file-limit`. Instead, it discovers supported code files under the repo root selected by `--path`.
+
+The code exploration commands do support:
+
+- `--exclude-dir` to skip directories like `dist`, `coverage`, or generated code
+- `--no-gitignore` to disable `.gitignore` filtering
+
+Example:
+
+```bash
+occ code find pattern service --path . --exclude-dir node_modules,.git,dist,coverage
+```
+
+This distinction matters when you are comparing the two command families: the default scan is document-format oriented, while `occ code` is repository-root oriented.

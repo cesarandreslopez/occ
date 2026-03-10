@@ -1,6 +1,6 @@
 {
   "name": "@cesarandreslopez/occ",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Office Cloc and Count — scc-style summary tables for office documents",
   "type": "module",
   "bin": {
@@ -43,6 +43,7 @@
     "build": "tsc",
     "dev": "tsx bin/occ.ts",
     "start": "node dist/bin/occ.js",
+    "test": "npm run build && node --import tsx --test test/**/*.test.ts",
     "prepublishOnly": "npm run build",
     "postinstall": "node scripts/postinstall.js"
   },

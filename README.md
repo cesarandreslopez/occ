@@ -9,12 +9,17 @@
 </p>
 
 <p align="center">
-  <strong>Office Cloc and Count</strong> — scc-style summary tables for office documents.
+  <strong>Office Cloc and Count</strong> — document metrics, structure extraction, and code exploration for real repositories.
 </p>
 
 ## What is this?
 
-OCC scans directories for office documents (DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP), extracts metrics like word counts, page counts, slide counts, and cell counts, and displays them in scc-style summary tables. When code files are also present, it auto-detects them and shells out to [scc](https://github.com/boyter/scc) for code metrics, printing both sections together.
+OCC started as a way to make office documents visible in the same workflows that already work well for code metrics tools like `scc` and `cloc`. In `0.3.0`, it also adds an on-demand code exploration surface under `occ code`, so the same CLI can now:
+
+- scan office documents for word/page/sheet/slide metrics
+- extract document heading structure for navigation and RAG-style use cases
+- summarize code metrics through `scc`
+- explore JavaScript, TypeScript, and Python repositories with symbol search, call analysis, dependency inspection, and inheritance queries
 
 ## Features
 
@@ -22,6 +27,7 @@ OCC scans directories for office documents (DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP
 - **Seven formats supported** — DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP
 - **Document structure extraction** — `--structure` parses heading hierarchy into a navigable tree with dotted section codes (1, 1.1, 1.2, ...)
 - **Code metrics via scc** — auto-detects code files and integrates scc output
+- **Code exploration via `occ code`** — JS/TS and Python-first symbol lookup, content search, callers/callees, dependency categories, inheritance, and ambiguity-aware chains
 - **Multiple output modes** — grouped by type, per-file breakdown, or JSON
 - **CI-friendly** — ASCII-only, no-color mode for pipelines
 - **Flexible filtering** — include/exclude extensions, exclude directories, .gitignore-aware
@@ -49,6 +55,7 @@ npx @cesarandreslopez/occ docs/ reports/
 git clone https://github.com/cesarandreslopez/occ.git && cd occ
 npm install
 npm run build
+npm test
 npm start
 ```
 
@@ -72,6 +79,12 @@ occ --structure docs/
 
 # Structure as JSON
 occ --structure --format json docs/
+
+# Explore JS/TS and Python code
+occ code find name UserService --path .
+occ code analyze callers createUser --path .
+occ code analyze deps src/deps --path .
+occ code analyze chain ambiguousCaller duplicate --path .
 
 # Only specific formats
 occ --include-ext pdf,docx docs/
@@ -155,6 +168,45 @@ Scanned 23 documents (56,750 words, 201 pages) in 120ms
 | `--large-file-limit <mb>` | Skip files over this size | `50` |
 | `--no-code` | Skip scc code analysis | off |
 
+## Code Exploration
+
+`occ code` adds on-demand code exploration without changing the existing document-scan workflow. It builds an in-memory repository graph for each command and does not require a database, daemon, or background indexer.
+
+The first-class support path in `0.3.0` is **JavaScript, TypeScript, and Python**. Other languages may be discovered and partially parsed, but the current resolver, fixtures, and output contracts are intentionally optimized around JS/TS and Python behavior.
+
+```bash
+# Exact symbol lookup
+occ code find name Greeter --path test/fixtures/code-explore
+
+# Substring search
+occ code find pattern service --path .
+
+# Full-text content search
+occ code find content normalize_name --path .
+
+# Outgoing and incoming call analysis
+occ code analyze calls bootstrap --path test/fixtures/code-explore
+occ code analyze callers createUser --path test/fixtures/code-explore
+
+# Dependency and inheritance inspection
+occ code analyze deps src/service --path test/fixtures/code-explore
+occ code analyze tree UserService --path test/fixtures/code-explore
+
+# Ambiguity-aware chain analysis
+occ code analyze chain ambiguousCaller duplicate --path test/fixtures/code-explore
+```
+
+Highlights of the current code exploration behavior:
+
+- **Exact, pattern, type, and content search** over the repository graph
+- **Call analysis** with explicit `resolved`, `ambiguous`, and `unresolved` states
+- **Receiver-aware method resolution** for `this`, `super`, `self`, and `cls`
+- **Dependency analysis** grouped into local, external, and unresolved imports
+- **Chain analysis** that reports when a path is blocked by ambiguity instead of silently returning nothing
+- **Shared CLI ergonomics** with `--path`, `--format`, `--output`, `--exclude-dir`, and `.gitignore` support
+
+All `occ code` commands support `--format tabular|json`. Most symbol-targeted commands also support `--file` for disambiguation, and JSON output includes repository metadata, query metadata, results, repository stats, and per-language capability flags.
+
 ## Documentation
 
 Full documentation is available at [cesarandreslopez.github.io/occ](https://cesarandreslopez.github.io/occ/), including:
@@ -162,7 +214,9 @@ Full documentation is available at [cesarandreslopez.github.io/occ](https://cesa
 - [Installation](https://cesarandreslopez.github.io/occ/getting-started/installation/)
 - [Quick Start](https://cesarandreslopez.github.io/occ/getting-started/quick-start/)
 - [CLI Reference](https://cesarandreslopez.github.io/occ/usage/cli-reference/)
+- [Output Formats](https://cesarandreslopez.github.io/occ/usage/output-formats/)
 - [Architecture](https://cesarandreslopez.github.io/occ/architecture/overview/)
+- [Changelog](https://cesarandreslopez.github.io/occ/changelog/)
 
 ## Why OCC?
 
@@ -180,7 +234,7 @@ Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases
 - **Context budgeting** — LLMs have finite context windows. OCC's word and page counts let agents estimate how much of a document set they can ingest before hitting token limits
 - **Prioritization** — an agent deciding which documents to read can use OCC's JSON output to rank files by size, word count, or type, focusing on the most relevant content first
 - **RAG chunk mapping** — `--structure --format json` outputs heading trees with character offsets, enabling chunk-to-section mapping, scoped retrieval, and citation paths in RAG pipelines
-- **Repository mapping** — agents exploring an unfamiliar codebase can run `occ --format json` to build a structured inventory of all non-code content alongside `scc` code metrics
+- **Repository mapping** — agents exploring an unfamiliar codebase can combine `occ --format json` for document inventory with `occ code ... --format json` for symbol and relationship data
 - **Pipeline integration** — JSON output pipes directly into agent toolchains for automated document analysis, summarization, or compliance checking
 
 ## How It Works
@@ -188,6 +242,8 @@ Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases
 OCC is written in TypeScript and uses [fast-glob](https://github.com/mrmlnc/fast-glob) for file discovery, dispatches to format-specific parsers (mammoth for DOCX, pdf-parse for PDF, SheetJS for XLSX, JSZip + officeparser for PPTX/ODF), aggregates metrics, and renders output via cli-table3. For code metrics, it shells out to a vendored [scc](https://github.com/boyter/scc) binary (auto-downloaded during `npm install`, with PATH fallback).
 
 For structure extraction (`--structure`), documents are first converted to markdown (mammoth + [turndown](https://github.com/mixmark-io/turndown) for DOCX, pdf-parse with page markers for PDF), then headers are extracted and assembled into a tree with dotted section codes.
+
+For `occ code`, OCC builds an in-memory code graph on demand. JavaScript and TypeScript are parsed with the TypeScript compiler API, Python uses a language-specific parser, and the query engine resolves symbols, imports, calls, inheritance, ambiguities, and dependency categories without a persistent database.
 
 ## Contributing
 
