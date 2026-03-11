@@ -145,6 +145,7 @@ export interface ClassTreeAnalysis {
 export interface CallChain {
   nodes: CodeNode[];
   edges: CodeEdge[];
+  direction?: 'forward' | 'reverse';
   status?: 'resolved' | 'blocked_ambiguous';
   blockedAt?: CodeNode;
   blockedBy?: CodeEdge;

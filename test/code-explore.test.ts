@@ -70,6 +70,17 @@ test('analyzeCallChain finds bootstrap to formatName path', async () => {
   const results = analyzeCallChain(index, 'bootstrap', 'formatName', 5);
 
   assert.equal(results.length, 1);
+  assert.equal(results[0]?.direction, 'forward');
+  assert.deepEqual(results[0]?.nodes.map(node => node.name), ['bootstrap', 'createUser', 'saveUser', 'formatName']);
+});
+
+test('analyzeCallChain finds path when arguments are in reverse call order', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+  const results = analyzeCallChain(index, 'formatName', 'bootstrap', 5);
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.direction, 'reverse');
+  assert.equal(results[0]?.status, 'resolved');
   assert.deepEqual(results[0]?.nodes.map(node => node.name), ['bootstrap', 'createUser', 'saveUser', 'formatName']);
 });
 
@@ -223,6 +234,7 @@ test('analyzeCallChain reports blocked ambiguity when path search cannot continu
   const results = analyzeCallChain(index, 'ambiguousCaller', 'duplicate', 5);
 
   assert.equal(results.length, 1);
+  assert.equal(results[0]?.direction, 'forward');
   assert.equal(results[0]?.status, 'blocked_ambiguous');
   assert.equal(results[0]?.blockedAt?.name, 'ambiguousCaller');
   assert.equal(results[0]?.blockedBy?.targetName, 'duplicate');
@@ -231,6 +243,13 @@ test('analyzeCallChain reports blocked ambiguity when path search cannot continu
     'src/duplicate-a.ts:1',
     'src/duplicate-b.ts:1',
   ]);
+});
+
+test('analyzeCallChain does not report reverse blocked ambiguity for the wrong direction', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+  const results = analyzeCallChain(index, 'duplicate', 'ambiguousCaller', 5);
+
+  assert.equal(results.length, 0);
 });
 
 test('blocked chain output explains the ambiguity', async () => {
@@ -242,6 +261,15 @@ test('blocked chain output explains the ambiguity', async () => {
   assert.match(output, /blocked by ambiguous call "duplicate"/);
   assert.match(output, /src\/duplicate-a\.ts:1/);
   assert.match(output, /src\/duplicate-b\.ts:1/);
+});
+
+test('reverse chain output explains that the match is reversed', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+  const results = analyzeCallChain(index, 'formatName', 'bootstrap', 5);
+  const output = formatChains(results, true);
+
+  assert.match(output, /reverse path/);
+  assert.match(output, /Calls flow in the opposite direction of the requested query/);
 });
 
 test('analyzeDeps separates local, external, and unresolved TypeScript imports', async () => {

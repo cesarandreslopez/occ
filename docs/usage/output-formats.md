@@ -424,6 +424,7 @@ Notable `occ code` JSON behaviors:
 
 - **Call edges** include `status` and may include `candidates` when a target is ambiguous
 - **Dependency analysis** returns separate `localImports`, `externalImports`, and `unresolvedImports`
+- **Call chains** may include `direction: "reverse"` when the discovered path runs opposite to the requested query
 - **Call chains** may return `status: "blocked_ambiguous"` with `blockedAt` and `blockedBy` metadata
 
 ### Ambiguous Call Edge Example

@@ -261,8 +261,13 @@ export function formatChains(chains: CallChain[], ci = false): string {
     const chain = chains[index];
     const title = chain.status === 'blocked_ambiguous'
       ? `Chain ${index + 1} (blocked by ambiguity)`
+      : chain.direction === 'reverse'
+        ? `Chain ${index + 1} (reverse path, depth ${chain.edges.length})`
       : `Chain ${index + 1} (depth ${chain.edges.length})`;
     lines.push(c.header(title));
+    if (chain.direction === 'reverse') {
+      lines.push(c.dim('Calls flow in the opposite direction of the requested query.'));
+    }
     for (let step = 0; step < chain.nodes.length; step++) {
       const node = chain.nodes[step];
       lines.push(`${'  '.repeat(step)}${node.name} (${formatLocation(node)})`);
