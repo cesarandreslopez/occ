@@ -237,6 +237,16 @@ export function analyzeDeps(index: CodebaseIndex, target: string): DependencyAna
   if (localFile) targetPaths.add(localFile.path);
   for (const node of moduleCandidates) targetPaths.add(node.path);
 
+  const isDirectory = !localFile && targetPaths.size === 0;
+  const dirPrefix = isDirectory ? (normalizedTarget.endsWith('/') ? normalizedTarget : `${normalizedTarget}/`) : undefined;
+  if (isDirectory) {
+    for (const node of index.nodes) {
+      if (node.type === 'file' && node.relativePath?.startsWith(dirPrefix!)) {
+        targetPaths.add(node.path);
+      }
+    }
+  }
+
   const importers: RelationMatch[] = [];
   const localImports: RelationMatch[] = [];
   const externalImports: RelationMatch[] = [];
@@ -245,17 +255,36 @@ export function analyzeDeps(index: CodebaseIndex, target: string): DependencyAna
   for (const edge of index.edges.filter(edge => edge.type === 'imports')) {
     const from = byId.get(edge.from);
     const to = edge.to ? byId.get(edge.to) : undefined;
-    if (to && (to.name === target || targetPaths.has(to.path))) {
-      if (from) importers.push({ from, edge, to });
-    }
-    if (from && localFile && from.path === localFile.path) {
-      const match = { from, edge, to };
-      if (edge.importKind === 'local') {
-        localImports.push(match);
-      } else if (edge.importKind === 'external') {
-        externalImports.push(match);
-      } else {
-        unresolvedImports.push(match);
+    const fromInside = from != null && targetPaths.has(from.path);
+    const toInside = to != null && targetPaths.has(to.path);
+
+    if (isDirectory) {
+      if (!fromInside && toInside && from) {
+        importers.push({ from, edge, to });
+      }
+      if (fromInside) {
+        const match = { from: from!, edge, to };
+        if (edge.importKind === 'external') {
+          externalImports.push(match);
+        } else if (edge.importKind === 'local' && !toInside) {
+          localImports.push(match);
+        } else if (edge.status === 'unresolved') {
+          unresolvedImports.push(match);
+        }
+      }
+    } else {
+      if (to && (to.name === target || targetPaths.has(to.path))) {
+        if (from) importers.push({ from, edge, to });
+      }
+      if (from && localFile && from.path === localFile.path) {
+        const match = { from, edge, to };
+        if (edge.importKind === 'local') {
+          localImports.push(match);
+        } else if (edge.importKind === 'external') {
+          externalImports.push(match);
+        } else {
+          unresolvedImports.push(match);
+        }
       }
     }
   }
