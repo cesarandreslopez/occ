@@ -14,7 +14,13 @@ For code exploration, OCC provides a separate namespace:
 occ code <find|analyze> ...
 ```
 
-`occ [directories...]` and `occ code ...` are separate command families. The default scan accepts positional directories. The code exploration path uses `--path <repo-root>`.
+For spreadsheet preflight, OCC also provides:
+
+```bash
+occ sheet inspect <file> ...
+```
+
+`occ [directories...]`, `occ code ...`, and `occ sheet ...` are separate command families. The default scan accepts positional directories. The code exploration path uses `--path <repo-root>`, while spreadsheet inspection targets one XLSX file at a time.
 
 ## Flags
 
@@ -149,6 +155,48 @@ occ --no-code docs/
 |------|---------|
 | `0` | Success |
 | `1` | Error (invalid arguments, scc not found, etc.) |
+
+## Spreadsheet Inspection Commands
+
+`occ sheet inspect` provides XLSX-specific preflight data for humans and agents before they serialize workbook contents more deeply.
+
+Common behaviors across the `occ sheet` namespace:
+
+- the current implementation is **XLSX-only**
+- tabular output focuses on workbook summary, sheet inventory, schema preview, and sample rows
+- JSON output exposes a stable command envelope with `file`, `query`, and `results`
+- header detection supports `auto`, `none`, or an explicit 1-based row number
+
+### `occ sheet inspect <file>`
+
+Inspect workbook metadata, per-sheet signals, schema hints, and small row samples:
+
+```bash
+occ sheet inspect finance.xlsx
+occ sheet inspect finance.xlsx --format json
+occ sheet inspect finance.xlsx --sheet Revenue --sample-rows 3 --max-columns 10
+occ sheet inspect finance.xlsx --header-row none
+```
+
+Available flags:
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--format <type>` | Output format: `tabular` or `json` | `tabular` |
+| `--output <file>` / `-o` | Write output to file | stdout |
+| `--ci` | ASCII-only output, no colors | off |
+| `--sheet <selector>` | Exact sheet name or 1-based sheet index | all sheets |
+| `--sample-rows <n>` | Maximum preview rows per sheet | `5` |
+| `--header-row <mode>` | `auto`, `none`, or a 1-based row number | `auto` |
+| `--max-columns <n>` | Maximum schema / sample columns to emit | `50` |
+
+Current XLSX inspection surfaces:
+
+- workbook properties and custom property count
+- visible, hidden, and very hidden sheet counts
+- workbook-scoped and sheet-scoped defined names
+- formula, comment, hyperlink, merge, and external-reference signals
+- per-sheet inferred schema and token estimates
 
 ## Code Exploration Commands
 

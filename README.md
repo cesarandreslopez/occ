@@ -18,6 +18,7 @@ OCC started as a way to make office documents visible in the same workflows that
 
 - scan office documents for word/page/sheet/slide metrics
 - extract document heading structure for navigation and RAG-style use cases
+- inspect XLSX workbooks for sheet inventory, schema preview, and lightweight samples before deeper reading
 - summarize code metrics through `scc`
 - explore JavaScript, TypeScript, and Python repositories with symbol search, call analysis, dependency inspection, and inheritance queries
 
@@ -26,6 +27,7 @@ OCC started as a way to make office documents visible in the same workflows that
 - **Office document metrics** — words, pages, paragraphs, slides, sheets, rows, cells
 - **Seven formats supported** — DOCX, XLSX, PPTX, PDF, ODT, ODS, ODP
 - **Document structure extraction** — `--structure` parses heading hierarchy into a navigable tree with dotted section codes (1, 1.1, 1.2, ...)
+- **Spreadsheet preflight via `occ sheet inspect`** — workbook properties, hidden sheets, names, formulas, links, comments, schema preview, and token estimates for XLSX
 - **Code metrics via scc** — auto-detects code files and integrates scc output
 - **Code exploration via `occ code`** — JS/TS and Python-first symbol lookup, content search, callers/callees, dependency categories, inheritance, and ambiguity-aware chains
 - **Multiple output modes** — grouped by type, per-file breakdown, or JSON
@@ -79,6 +81,10 @@ occ --structure docs/
 
 # Structure as JSON
 occ --structure --format json docs/
+
+# Inspect an XLSX workbook before reading its contents deeply
+occ sheet inspect finance.xlsx
+occ sheet inspect finance.xlsx --format json --sample-rows 3 --max-columns 12
 
 # Explore JS/TS and Python code
 occ code find name UserService --path .
@@ -207,6 +213,29 @@ Highlights of the current code exploration behavior:
 
 All `occ code` commands support `--format tabular|json`. Most symbol-targeted commands also support `--file` for disambiguation, and JSON output includes repository metadata, query metadata, results, repository stats, and per-language capability flags.
 
+## Spreadsheet Inspection
+
+`occ sheet inspect` is a lightweight XLSX preflight command aimed at both humans and agents. It helps answer "is this workbook worth reading in depth?" before spending tokens serializing cells or opening the file in Excel.
+
+```bash
+# Workbook-level summary + per-sheet schema/sample preview
+occ sheet inspect finance.xlsx
+
+# Machine-readable inspection payload
+occ sheet inspect finance.xlsx --format json
+
+# Narrow to one sheet and reduce preview width
+occ sheet inspect finance.xlsx --sheet Revenue --sample-rows 3 --max-columns 8
+```
+
+Current XLSX inspection highlights:
+
+- **Workbook metadata** — file size, workbook properties, custom properties, workbook-scoped names
+- **Sheet inventory** — visible / hidden / very hidden sheets, used ranges, cell counts, formula/comment/link counts
+- **Schema preview** — detected header row, inferred column types, coverage ratios, example values
+- **Lightweight sampling** — small row previews designed for preflight rather than full extraction
+- **Token estimates** — sample and full-sheet token estimates to guide downstream agent reads
+
 ## Documentation
 
 Full documentation is available at [cesarandreslopez.github.io/occ](https://cesarandreslopez.github.io/occ/), including:
@@ -234,6 +263,7 @@ Tools like `scc`, `cloc`, and `tokei` give you instant visibility into codebases
 - **Context budgeting** — LLMs have finite context windows. OCC's word and page counts let agents estimate how much of a document set they can ingest before hitting token limits
 - **Prioritization** — an agent deciding which documents to read can use OCC's JSON output to rank files by size, word count, or type, focusing on the most relevant content first
 - **RAG chunk mapping** — `--structure --format json` outputs heading trees with character offsets, enabling chunk-to-section mapping, scoped retrieval, and citation paths in RAG pipelines
+- **Spreadsheet triage** — `occ sheet inspect --format json` exposes sheet visibility, formulas, links, comments, schema hints, and token estimates before an agent expands workbook contents
 - **Repository mapping** — agents exploring an unfamiliar codebase can combine `occ --format json` for document inventory with `occ code ... --format json` for symbol and relationship data
 - **Pipeline integration** — JSON output pipes directly into agent toolchains for automated document analysis, summarization, or compliance checking
 
