@@ -1,9 +1,6 @@
 import { Packer, Document, Paragraph, TextRun, HeadingLevel } from 'docx';
-import * as XLSX from 'xlsx';
-import * as fs from 'node:fs';
+import XLSX from 'xlsx';
 import { writeFile, mkdir } from 'node:fs/promises';
-
-XLSX.set_fs(fs);
 
 await mkdir('test/fixtures', { recursive: true });
 
@@ -85,7 +82,8 @@ async function createXlsx() {
   ]);
   XLSX.utils.book_append_sheet(workbook, sheet2, 'Sheet2');
 
-  XLSX.writeFile(workbook, 'test/fixtures/sample.xlsx');
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  await writeFile('test/fixtures/sample.xlsx', buffer);
   console.log('Created sample.xlsx');
 }
 
