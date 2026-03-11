@@ -43,7 +43,7 @@ function getOptions(command: Command): CodeCommandOptions {
   return command.optsWithGlobals() as CodeCommandOptions;
 }
 
-const FINDABLE_TYPES: CodeNodeType[] = ['file', 'module', 'function', 'class', 'variable'];
+const FINDABLE_TYPES: CodeNodeType[] = ['file', 'module', 'function', 'class', 'interface', 'type-alias', 'enum', 'variable'];
 
 function parseLimit(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
@@ -211,7 +211,7 @@ export function registerCodeCommands(program: Command) {
     await emit(output.endsWith('\n') ? output : `${output}\n`, options);
   });
 
-  const analyzeTreeCmd = analyze.command('tree <className>').description('Show class inheritance relationships');
+  const analyzeTreeCmd = analyze.command('tree <className>').description('Show class/interface inheritance relationships');
   addSharedOptions(analyzeTreeCmd, { includeFile: true });
   analyzeTreeCmd.action(async (className: string, _options: CodeCommandOptions, command: Command) => {
     const options = getOptions(command);

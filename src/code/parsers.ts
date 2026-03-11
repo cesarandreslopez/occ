@@ -144,22 +144,61 @@ function parseTypescriptFile(filePath: string, content: string, context: ParserC
       });
       if (node.heritageClauses) {
         for (const clause of node.heritageClauses) {
-          if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
-            for (const typeNode of clause.types) {
-              const expressionText = typeNode.expression.getText(sourceFile);
-              inheritances.push({
-                className: name,
-                classLine: lineOf(sourceFile, node),
-                baseName: expressionText.split('.').at(-1) ?? expressionText,
-                line: lineOf(sourceFile, typeNode),
-              });
-            }
+          for (const typeNode of clause.types) {
+            const expressionText = typeNode.expression.getText(sourceFile);
+            inheritances.push({
+              className: name,
+              classLine: lineOf(sourceFile, node),
+              baseName: expressionText.split('.').at(-1) ?? expressionText,
+              line: lineOf(sourceFile, typeNode),
+              kind: clause.token === ts.SyntaxKind.ImplementsKeyword ? 'implements' : 'extends',
+            });
           }
         }
       }
       stack.push({ type: 'class', name, line: lineOf(sourceFile, node) });
       ts.forEachChild(node, visit);
       stack.pop();
+      return;
+    } else if (ts.isInterfaceDeclaration(node)) {
+      const name = node.name.text;
+      pushUniqueSymbol(symbols, {
+        type: 'interface',
+        name,
+        line: lineOf(sourceFile, node),
+        exported: hasExportModifier(node),
+      });
+      if (node.heritageClauses) {
+        for (const clause of node.heritageClauses) {
+          for (const typeNode of clause.types) {
+            const expressionText = typeNode.expression.getText(sourceFile);
+            inheritances.push({
+              className: name,
+              classLine: lineOf(sourceFile, node),
+              baseName: expressionText.split('.').at(-1) ?? expressionText,
+              line: lineOf(sourceFile, typeNode),
+              kind: 'extends',
+            });
+          }
+        }
+      }
+      ts.forEachChild(node, visit);
+      return;
+    } else if (ts.isTypeAliasDeclaration(node)) {
+      pushUniqueSymbol(symbols, {
+        type: 'type-alias',
+        name: node.name.text,
+        line: lineOf(sourceFile, node),
+        exported: hasExportModifier(node),
+      });
+      return;
+    } else if (ts.isEnumDeclaration(node)) {
+      pushUniqueSymbol(symbols, {
+        type: 'enum',
+        name: node.name.text,
+        line: lineOf(sourceFile, node),
+        exported: hasExportModifier(node),
+      });
       return;
     } else if (ts.isVariableStatement(node)) {
       const exported = hasExportModifier(node);

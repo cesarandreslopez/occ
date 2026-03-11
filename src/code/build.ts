@@ -49,7 +49,8 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
   const nodes: CodeNode[] = [];
   const edges: CodeEdge[] = [];
   const functionsByName = new Map<string, CodeNode[]>();
-  const classesByName = new Map<string, CodeNode[]>();
+  const classNodesByName = new Map<string, CodeNode[]>();
+  const interfaceNodesByName = new Map<string, CodeNode[]>();
   const filesByPath = new Map<string, CodeNode>();
   const modulesByName = new Map<string, CodeNode[]>();
   const topLevelSymbolsByFile = new Map<string, Map<string, CodeNode[]>>();
@@ -143,8 +144,10 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
           }
         }
       } else if (node.type === 'class') {
-        classesByName.set(node.name, [...(classesByName.get(node.name) ?? []), node]);
+        classNodesByName.set(node.name, [...(classNodesByName.get(node.name) ?? []), node]);
         classByFileAndName.set(classKey(file.path, node.name), node);
+      } else if (node.type === 'interface') {
+        interfaceNodesByName.set(node.name, [...(interfaceNodesByName.get(node.name) ?? []), node]);
       }
     }
 
@@ -211,17 +214,26 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
     }
 
     for (const inheritance of file.inheritances) {
-      const classNodeId = makeId('class', file.path, inheritance.className, inheritance.classLine);
+      const classNodeType = file.symbols.find(s => s.name === inheritance.className && s.line === inheritance.classLine)?.type ?? 'class';
+      const classNodeId = makeId(classNodeType, file.path, inheritance.className, inheritance.classLine);
       const classNode = symbolByIdentity.get(classNodeId);
       if (!classNode) continue;
-      parentNamesByClassId.set(classNode.id, [...(parentNamesByClassId.get(classNode.id) ?? []), inheritance.baseName]);
-      const localCandidates = classesByName.get(inheritance.baseName) ?? [];
+      const edgeType = inheritance.kind === 'implements' ? 'implements' as const : 'inherits' as const;
+      if (edgeType === 'inherits') {
+        parentNamesByClassId.set(classNode.id, [...(parentNamesByClassId.get(classNode.id) ?? []), inheritance.baseName]);
+      }
+      const candidatePool = edgeType === 'implements'
+        ? interfaceNodesByName
+        : classNode.type === 'interface'
+          ? interfaceNodesByName
+          : classNodesByName;
+      const localCandidates = candidatePool.get(inheritance.baseName) ?? [];
       const exactLocal = localCandidates.filter(candidate => candidate.path === file.path);
       const candidates = exactLocal.length > 0 ? exactLocal : localCandidates;
       const resolved = candidates.length === 1 ? candidates[0] : undefined;
       edges.push({
-        id: makeId('inherits', classNode.id, inheritance.baseName, inheritance.line),
-        type: 'inherits',
+        id: makeId(edgeType, classNode.id, inheritance.baseName, inheritance.line),
+        type: edgeType,
         from: classNode.id,
         to: resolved?.id,
         fromPath: file.path,
@@ -249,7 +261,7 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
       const inherited: CodeNode[] = [];
       for (const parentName of parents) {
         const directParent = classByFileAndName.get(classKey(classNode.path, parentName));
-        const parentCandidates = directParent ? [directParent] : (classesByName.get(parentName) ?? []);
+        const parentCandidates = directParent ? [directParent] : (classNodesByName.get(parentName) ?? []);
         for (const parentNode of parentCandidates) {
           inherited.push(...resolveClassMethods(parentNode, methodName, true));
         }
@@ -279,7 +291,7 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
         const parentCandidates: CodeNode[] = [];
         for (const parentName of parents) {
           const directParent = callerClassNode ? classByFileAndName.get(classKey(callerClassNode.path, parentName)) : undefined;
-          const baseCandidates = directParent ? [directParent] : (classesByName.get(parentName) ?? []);
+          const baseCandidates = directParent ? [directParent] : (classNodesByName.get(parentName) ?? []);
           for (const parentNode of baseCandidates) {
             parentCandidates.push(...resolveClassMethods(parentNode, call.calleeName, true));
           }
