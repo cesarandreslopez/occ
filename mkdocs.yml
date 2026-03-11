@@ -78,6 +78,7 @@ nav:
   - Architecture:
     - Overview: architecture/overview.md
     - Parser System: architecture/parsers.md
+    - Document Navigation: architecture/document-navigation.md
     - scc Integration: architecture/scc-integration.md
   - Contributing: contributing.md
   - Changelog: changelog.md
