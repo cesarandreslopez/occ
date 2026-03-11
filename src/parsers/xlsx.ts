@@ -1,11 +1,10 @@
-import * as XLSX from 'xlsx';
-import * as fs from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import XLSX from 'xlsx';
 import type { ParserOutput } from '../types.js';
 
-XLSX.set_fs(fs);
-
 export async function parseXlsx(filePath: string): Promise<ParserOutput> {
-  const workbook = XLSX.readFile(filePath);
+  const buffer = await readFile(filePath);
+  const workbook = XLSX.read(buffer, { type: 'buffer' });
 
   const sheets = workbook.SheetNames.length;
   let rows = 0;
