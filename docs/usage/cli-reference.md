@@ -216,7 +216,7 @@ occ code analyze callers createUser --path .
 
 ### `occ code analyze chain <from> <to>`
 
-Find a call path between two functions. When OCC cannot continue because the next hop is ambiguous, it reports a blocked chain instead of silently returning nothing:
+Find a call path between two functions. If OCC only finds a path in the opposite direction, it labels the result as a reverse path. When OCC cannot continue because the next hop is ambiguous, it reports a blocked chain instead of silently returning nothing:
 
 ```bash
 occ code analyze chain bootstrap formatName --path . --depth 5

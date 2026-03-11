@@ -191,6 +191,10 @@ function searchCallChain(index: CodebaseIndex, starts: CodeNode[], targetIds: Se
   };
 }
 
+function markDirection(chains: CallChain[], direction: CallChain['direction']): CallChain[] {
+  return chains.map(chain => ({ ...chain, direction }));
+}
+
 export function analyzeCallChain(index: CodebaseIndex, fromName: string, toName: string, depth = 5, fromFile?: string, toFile?: string): CallChain[] {
   const fromNodes = resolveFunctionNodes(index, fromName, fromFile);
   const toNodes = resolveFunctionNodes(index, toName, toFile);
@@ -199,15 +203,15 @@ export function analyzeCallChain(index: CodebaseIndex, fromName: string, toName:
 
   const forward = searchCallChain(index, fromNodes, toIds, depth);
   if (forward.chains.length > 0) {
-    return [...forward.chains, ...forward.blocked].slice(0, 20);
+    return [...markDirection(forward.chains, 'forward'), ...markDirection(forward.blocked, 'forward')].slice(0, 20);
   }
 
   const reverse = searchCallChain(index, toNodes, fromIds, depth);
   if (reverse.chains.length > 0) {
-    return [...reverse.chains, ...reverse.blocked].slice(0, 20);
+    return markDirection(reverse.chains, 'reverse').slice(0, 20);
   }
 
-  return [...forward.blocked, ...reverse.blocked].slice(0, 20);
+  return markDirection(forward.blocked, 'forward').slice(0, 20);
 }
 
 export function analyzeDeps(index: CodebaseIndex, target: string): DependencyAnalysis {
