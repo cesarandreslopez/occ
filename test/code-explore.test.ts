@@ -308,6 +308,7 @@ test('dependency output shows explicit import categories', async () => {
   assert.match(output, /\.\/missing/);
 });
 
+<<<<<<< HEAD
 test('findByName indexes TypeScript interfaces, type aliases, and enums', async () => {
   const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
 
@@ -399,4 +400,14 @@ test('analyzeTree prefers classes on name collisions and still allows file disam
   assert(interfaceTree);
   assert.equal(interfaceTree.target.type, 'interface');
   assert.equal(interfaceTree.target.relativePath, 'src/a.ts');
+});
+
+test('analyzeDeps aggregates imports for a directory target', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+  const results = analyzeDeps(index, 'src');
+
+  assert.equal(results.importers.length, 0);
+  assert.deepEqual(results.externalImports.map(item => item.to?.name ?? item.edge.targetName), ['node:path']);
+  assert.deepEqual(results.unresolvedImports.map(item => item.edge.targetName), ['./missing']);
+  assert.equal(results.localImports.length, 0);
 });
