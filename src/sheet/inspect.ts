@@ -2,6 +2,7 @@ import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import XLSX from 'xlsx';
 import type { CellObject, Range, WorkSheet } from 'xlsx';
+import { estimateTokens, asOptionalString, formatDateLike } from '../inspect/shared.js';
 import type {
   CellTypeCounts,
   ColumnProfile,
@@ -513,11 +514,6 @@ function isExternalFormula(formula: string): boolean {
   return /\[[^\]]+\]/.test(formula) || /https?:\/\//i.test(formula);
 }
 
-function estimateTokens(input: string | number): number {
-  const chars = typeof input === 'number' ? input : input.length;
-  return Math.max(0, Math.ceil(chars / 4));
-}
-
 function estimateSampleChars(rows: SampleRow[]): number {
   let chars = 0;
   for (const row of rows) {
@@ -530,12 +526,3 @@ function estimateSampleChars(rows: SampleRow[]): number {
   return chars;
 }
 
-function asOptionalString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() ? value : undefined;
-}
-
-function formatDateLike(value: unknown): string | undefined {
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === 'string' && value.trim()) return value;
-  return undefined;
-}

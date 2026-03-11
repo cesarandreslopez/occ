@@ -14,6 +14,8 @@ import { extractFromMarkdown } from './structure/index.js';
 import { formatStructureTree, formatStructureJson } from './output/tree.js';
 import { registerCodeCommands } from './code/command.js';
 import { registerSheetCommands } from './sheet/command.js';
+import { registerDocCommands } from './doc/command.js';
+import { registerSlideCommands } from './slide/command.js';
 import type { StructureResult } from './output/tree.js';
 import type { ParseResult } from './types.js';
 import type { FileEntry } from './types.js';
@@ -78,6 +80,8 @@ export async function run(argv: string[]) {
 
   registerCodeCommands(program);
   registerSheetCommands(program);
+  registerDocCommands(program);
+  registerSlideCommands(program);
 
   await program.parseAsync(argv);
 }
