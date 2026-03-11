@@ -11,6 +11,7 @@ import {
   analyzeTree,
   createPayload,
   findByName,
+  findByType,
   findContent,
 } from '../src/code/query.js';
 const fixtureRoot = path.resolve('test/fixtures/code-explore');
@@ -18,7 +19,7 @@ const fixtureRoot = path.resolve('test/fixtures/code-explore');
 test('buildCodebaseIndex indexes JS/TS and Python fixtures', async () => {
   const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
 
-  assert.equal(index.files.length, 17);
+  assert.equal(index.files.length, 18);
   assert.deepEqual(Object.keys(index.capabilities).sort(), ['python', 'typescript']);
   assert.equal(index.capabilities.typescript.calls, true);
   assert.equal(index.capabilities.python.inheritance, true);
@@ -111,7 +112,7 @@ test('JSON payload envelope stays stable for code queries', async () => {
   assert.equal(payload.repo, fixtureRoot);
   assert.equal(payload.query.command, 'code.find.name');
   assert.equal(payload.query.value, 'Greeter');
-  assert.equal(payload.stats.filesIndexed, 17);
+  assert.equal(payload.stats.filesIndexed, 18);
   assert.equal(payload.results[0]?.node.name, 'Greeter');
   assert.equal(payload.results[0]?.node.relativePath, 'python/helpers.py');
   assert.equal(payload.results[0]?.node.language, 'python');
@@ -275,4 +276,51 @@ test('dependency output shows explicit import categories', async () => {
   assert.match(output, /src\/utils/);
   assert.match(output, /node:path/);
   assert.match(output, /\.\/missing/);
+});
+
+test('findByName indexes TypeScript interfaces, type aliases, and enums', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+
+  const iface = findByName(index, 'Serializable');
+  assert.equal(iface.length, 1);
+  assert.equal(iface[0]?.node.type, 'interface');
+  assert.equal(iface[0]?.node.relativePath, 'src/types.ts');
+
+  const alias = findByName(index, 'UserId');
+  assert.equal(alias.length, 1);
+  assert.equal(alias[0]?.node.type, 'type-alias');
+
+  const enumResult = findByName(index, 'Status');
+  assert.equal(enumResult.length, 1);
+  assert.equal(enumResult[0]?.node.type, 'enum');
+
+  const allInterfaces = findByType(index, 'interface');
+  assert.deepEqual(allInterfaces.map(r => r.node.name).sort(), ['Loggable', 'Serializable']);
+});
+
+test('analyzeTree shows interface extends interface', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+  const results = analyzeTree(index, 'Loggable');
+
+  assert(results);
+  assert.equal(results.target.type, 'interface');
+  assert.deepEqual(results.parents.map(p => p.to?.name ?? p.edge.targetName), ['Serializable']);
+  assert.equal(results.parents[0]?.edge.type, 'inherits');
+});
+
+test('analyzeTree shows implements relationship from both directions', async () => {
+  const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
+
+  const classTree = analyzeTree(index, 'UserStore');
+  assert(classTree);
+  assert.equal(classTree.target.type, 'class');
+  assert.deepEqual(classTree.parents.map(p => p.to?.name ?? p.edge.targetName), ['Loggable']);
+  assert.equal(classTree.parents[0]?.edge.type, 'implements');
+  assert.equal(classTree.parents[0]?.edge.status, 'resolved');
+
+  const ifaceTree = analyzeTree(index, 'Loggable');
+  assert(ifaceTree);
+  assert.equal(ifaceTree.children.length, 1);
+  assert.equal(ifaceTree.children[0]?.from.name, 'UserStore');
+  assert.equal(ifaceTree.children[0]?.edge.type, 'implements');
 });

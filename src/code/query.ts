@@ -111,10 +111,12 @@ function resolveFunctionNodes(index: CodebaseIndex, name: string, file?: string)
     .sort(compareNodes);
 }
 
+const CLASS_LIKE_TYPES: Set<CodeNodeType> = new Set(['class', 'interface', 'enum']);
+
 function resolveClassNodes(index: CodebaseIndex, name: string, file?: string): CodeNode[] {
   const fileFilter = resolveFileFilter(index.repoRoot, file);
   return index.nodes
-    .filter(node => node.type === 'class' && node.name === name)
+    .filter(node => CLASS_LIKE_TYPES.has(node.type) && node.name === name)
     .filter(node => matchesFile(node, fileFilter))
     .sort(compareNodes);
 }
@@ -242,9 +244,12 @@ export function analyzeTree(index: CodebaseIndex, className: string, file?: stri
   const target = resolveClassNodes(index, className, file)[0];
   if (!target) return null;
 
-  const parents = outgoingEdges(index, 'inherits', target.id).map(edge => ({ from: target, edge, to: edge.to ? byId.get(edge.to) : undefined }));
+  const parents = [
+    ...outgoingEdges(index, 'inherits', target.id),
+    ...outgoingEdges(index, 'implements', target.id),
+  ].map(edge => ({ from: target, edge, to: edge.to ? byId.get(edge.to) : undefined }));
   const children: RelationMatch[] = [];
-  for (const edge of incomingEdges(index, 'inherits', target.id)) {
+  for (const edge of [...incomingEdges(index, 'inherits', target.id), ...incomingEdges(index, 'implements', target.id)]) {
     const from = byId.get(edge.from);
     if (from) children.push({ from, edge, to: target });
   }

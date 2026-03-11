@@ -222,14 +222,18 @@ export function formatClassTree(result: ClassTreeAnalysis | null, ci = false): s
   const c = palette(ci);
   if (!result) return `${c.dim('Class not found.')}\n`;
 
+  const typeLabel = result.target.type === 'interface' ? 'Interface'
+    : result.target.type === 'enum' ? 'Enum'
+    : 'Class';
   const lines: string[] = [];
-  lines.push(c.header(`Class: ${result.target.name} (${formatLocation(result.target)})`));
+  lines.push(c.header(`${typeLabel}: ${result.target.name} (${formatLocation(result.target)})`));
 
   if (result.parents.length > 0) {
     lines.push('');
     lines.push(c.key('Parents'));
     for (const parent of result.parents) {
-      lines.push(`  ${parent.to?.name ?? parent.edge.targetName ?? '(unresolved)'} [${parent.edge.status}]`);
+      const relation = parent.edge.type === 'implements' ? 'implements' : 'extends';
+      lines.push(`  ${parent.to?.name ?? parent.edge.targetName ?? '(unresolved)'} [${relation}, ${parent.edge.status}]`);
     }
   }
 

@@ -1,5 +1,5 @@
-export type CodeNodeType = 'file' | 'module' | 'function' | 'class' | 'variable' | 'parameter';
-export type CodeEdgeType = 'contains' | 'imports' | 'calls' | 'inherits' | 'has_parameter';
+export type CodeNodeType = 'file' | 'module' | 'function' | 'class' | 'interface' | 'type-alias' | 'enum' | 'variable' | 'parameter';
+export type CodeEdgeType = 'contains' | 'imports' | 'calls' | 'inherits' | 'implements' | 'has_parameter';
 export type ResolutionStatus = 'resolved' | 'ambiguous' | 'unresolved';
 export type ImportKind = 'local' | 'external' | 'unresolved';
 
@@ -27,7 +27,7 @@ export interface ParsedImport {
 }
 
 export interface ParsedSymbol {
-  type: Extract<CodeNodeType, 'function' | 'class' | 'variable'>;
+  type: Extract<CodeNodeType, 'function' | 'class' | 'interface' | 'type-alias' | 'enum' | 'variable'>;
   name: string;
   line: number;
   containerName?: string;
@@ -49,6 +49,7 @@ export interface ParsedInheritance {
   classLine: number;
   baseName: string;
   line: number;
+  kind?: 'extends' | 'implements';
 }
 
 export interface ParsedFile {

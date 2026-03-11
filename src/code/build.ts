@@ -142,7 +142,7 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
             methodNodesByClassId.set(parentClassNode.id, [...(methodNodesByClassId.get(parentClassNode.id) ?? []), node]);
           }
         }
-      } else if (node.type === 'class') {
+      } else if (node.type === 'class' || node.type === 'interface' || node.type === 'enum') {
         classesByName.set(node.name, [...(classesByName.get(node.name) ?? []), node]);
         classByFileAndName.set(classKey(file.path, node.name), node);
       }
@@ -211,17 +211,21 @@ export async function buildCodebaseIndex(options: BuildCodebaseOptions): Promise
     }
 
     for (const inheritance of file.inheritances) {
-      const classNodeId = makeId('class', file.path, inheritance.className, inheritance.classLine);
+      const classNodeType = file.symbols.find(s => s.name === inheritance.className && s.line === inheritance.classLine)?.type ?? 'class';
+      const classNodeId = makeId(classNodeType, file.path, inheritance.className, inheritance.classLine);
       const classNode = symbolByIdentity.get(classNodeId);
       if (!classNode) continue;
-      parentNamesByClassId.set(classNode.id, [...(parentNamesByClassId.get(classNode.id) ?? []), inheritance.baseName]);
+      const edgeType = inheritance.kind === 'implements' ? 'implements' as const : 'inherits' as const;
+      if (edgeType === 'inherits') {
+        parentNamesByClassId.set(classNode.id, [...(parentNamesByClassId.get(classNode.id) ?? []), inheritance.baseName]);
+      }
       const localCandidates = classesByName.get(inheritance.baseName) ?? [];
       const exactLocal = localCandidates.filter(candidate => candidate.path === file.path);
       const candidates = exactLocal.length > 0 ? exactLocal : localCandidates;
       const resolved = candidates.length === 1 ? candidates[0] : undefined;
       edges.push({
-        id: makeId('inherits', classNode.id, inheritance.baseName, inheritance.line),
-        type: 'inherits',
+        id: makeId(edgeType, classNode.id, inheritance.baseName, inheritance.line),
+        type: edgeType,
         from: classNode.id,
         to: resolved?.id,
         fromPath: file.path,
