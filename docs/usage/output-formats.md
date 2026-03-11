@@ -188,6 +188,130 @@ occ --output report.txt docs/
 occ --format json -o report.json docs/
 ```
 
+## Spreadsheet Inspection Output
+
+`occ sheet inspect` prints workbook-level preflight data plus per-sheet schema and sample previews.
+
+```bash
+occ sheet inspect finance.xlsx
+```
+
+Example tabular shape:
+
+```text
+File: /path/to/finance.xlsx
+Format: XLSX
+Size: 1.2 MB
+Sheets: 4 total (2 visible, 1 hidden, 1 very hidden)
+Risk Flags: hiddenSheets, formulas, hyperlinks
+
+-- Sheet Inventory --------------------------------------------------------
+  Sheet            Visibility     Range     Rows   Cols   Non-Empty   Tokens
+  1. Revenue       visible        A1:H120    120      8         852      920
+  2. Archive       hidden         A1:C40      40      3         118      140
+
+-- Sheet: Revenue (visible) ----------------------------------------------
+Range: A1:H120
+Grid: 120 rows x 8 cols (960 cells)
+Signals: 12 formulae | 0 comments | 3 hyperlinks | 0 merges
+Header: 1 (auto)
+Token Estimate: sample=45 | full=920
+
+Schema
+  Col      Name       Type      Non-Empty    Coverage    Examples
+  A (1)    Region     string          119         99%    NA | EU | APAC
+  B (2)    Revenue    number          119         99%    1200 | 980 | 1430
+
+Sample
+  Row    Region    Revenue
+  2      NA        1200
+  3      EU        980
+```
+
+JSON mode uses a stable command envelope:
+
+```bash
+occ sheet inspect finance.xlsx --format json
+```
+
+```json
+{
+  "file": "/path/to/finance.xlsx",
+  "query": {
+    "command": "sheet.inspect",
+    "sampleRows": 5,
+    "headerRow": "auto",
+    "maxColumns": 50
+  },
+  "results": {
+    "workbook": {
+      "file": "/path/to/finance.xlsx",
+      "format": "xlsx",
+      "sheetCount": 4,
+      "visibleSheetCount": 2,
+      "hiddenSheetCount": 1,
+      "veryHiddenSheetCount": 1,
+      "definedNames": [
+        {
+          "name": "GlobalRevenue",
+          "ref": "Revenue!$B$2:$B$100",
+          "scope": "workbook",
+          "external": false
+        }
+      ],
+      "riskFlags": {
+        "hiddenSheets": true,
+        "formulas": true,
+        "comments": false,
+        "hyperlinks": true,
+        "mergedCells": false,
+        "protectedSheets": false,
+        "externalFormulaRefs": false
+      }
+    },
+    "sheets": [
+      {
+        "name": "Revenue",
+        "visibility": "visible",
+        "usedRange": "A1:H120",
+        "formulaCellCount": 12,
+        "schema": {
+          "truncated": false,
+          "columns": [
+            {
+              "letter": "A",
+              "name": "Region",
+              "dominantType": "string",
+              "nonEmptyCount": 119,
+              "nonEmptyRatio": 0.992,
+              "examples": ["NA", "EU", "APAC"]
+            }
+          ]
+        },
+        "sample": {
+          "truncatedRows": true,
+          "truncatedColumns": false,
+          "rows": [
+            {
+              "rowNumber": 2,
+              "values": {
+                "Region": "NA",
+                "Revenue": "1200"
+              }
+            }
+          ]
+        },
+        "sampleTokenEstimate": 45,
+        "fullTokenEstimate": 920,
+        "estimateMethod": "full_scan"
+      }
+    ]
+  }
+}
+```
+
+The workbook section carries file-level metadata and aggregate risk flags. Each sheet entry carries preflight signals, inferred schema, row samples, and token estimates.
+
 ## Code Exploration Tabular Output
 
 `occ code` prints command-specific terminal output instead of the document summary tables. The exact layout depends on the query, but the semantics are consistent:

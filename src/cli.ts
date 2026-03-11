@@ -13,6 +13,7 @@ import { documentToMarkdown } from './markdown/convert.js';
 import { extractFromMarkdown } from './structure/index.js';
 import { formatStructureTree, formatStructureJson } from './output/tree.js';
 import { registerCodeCommands } from './code/command.js';
+import { registerSheetCommands } from './sheet/command.js';
 import type { StructureResult } from './output/tree.js';
 import type { ParseResult } from './types.js';
 import type { FileEntry } from './types.js';
@@ -76,6 +77,7 @@ export async function run(argv: string[]) {
     });
 
   registerCodeCommands(program);
+  registerSheetCommands(program);
 
   await program.parseAsync(argv);
 }

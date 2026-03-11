@@ -42,6 +42,8 @@ PDF is the only format that provides a true page count rather than an estimate.
 
 Word and page counts are not extracted from spreadsheets.
 
+**Spreadsheet inspection:** `occ sheet inspect <file>` uses the same SheetJS workbook model to expose workbook properties, hidden sheet state, defined names, formula/comment/hyperlink signals, inferred schema, and lightweight row samples for agent-oriented preflight.
+
 ## PowerPoint (.pptx)
 
 **Parser:** [JSZip](https://www.npmjs.com/package/jszip) + [officeparser](https://www.npmjs.com/package/officeparser)
