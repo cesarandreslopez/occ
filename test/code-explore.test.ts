@@ -308,7 +308,6 @@ test('dependency output shows explicit import categories', async () => {
   assert.match(output, /\.\/missing/);
 });
 
-<<<<<<< HEAD
 test('findByName indexes TypeScript interfaces, type aliases, and enums', async () => {
   const index = await buildCodebaseIndex({ repoRoot: fixtureRoot });
 
@@ -410,4 +409,34 @@ test('analyzeDeps aggregates imports for a directory target', async () => {
   assert.deepEqual(results.externalImports.map(item => item.to?.name ?? item.edge.targetName), ['node:path']);
   assert.deepEqual(results.unresolvedImports.map(item => item.edge.targetName), ['./missing']);
   assert.equal(results.localImports.length, 0);
+});
+
+test('directory dependency aggregation preserves repeated external imports from different files', async () => {
+  const repoRoot = await mkdtemp(path.join(os.tmpdir(), 'occ-pr4-'));
+  await mkdir(path.join(repoRoot, 'src'));
+  await writeFile(path.join(repoRoot, 'src', 'a.ts'), 'import path from "node:path";\nexport const a = path.sep;\n');
+  await writeFile(path.join(repoRoot, 'src', 'b.ts'), 'import path from "node:path";\nexport const b = path.sep;\n');
+
+  const index = await buildCodebaseIndex({ repoRoot });
+  const results = analyzeDeps(index, 'src');
+
+  assert.equal(results.externalImports.length, 2);
+  assert.deepEqual(results.externalImports.map(item => item.from.relativePath).sort(), ['src/a.ts', 'src/b.ts']);
+  assert.deepEqual(results.externalImports.map(item => item.to?.name ?? item.edge.targetName), ['node:path', 'node:path']);
+});
+
+test('directory dependency aggregation preserves distinct importers for the same internal target', async () => {
+  const repoRoot = await mkdtemp(path.join(os.tmpdir(), 'occ-pr4-'));
+  await mkdir(path.join(repoRoot, 'src'));
+  await mkdir(path.join(repoRoot, 'outside'));
+  await writeFile(path.join(repoRoot, 'src', 'a.ts'), 'export const a = 1;\n');
+  await writeFile(path.join(repoRoot, 'outside', 'one.ts'), 'import { a } from "../src/a";\nconsole.log(a);\n');
+  await writeFile(path.join(repoRoot, 'outside', 'two.ts'), 'import { a } from "../src/a";\nconsole.log(a);\n');
+
+  const index = await buildCodebaseIndex({ repoRoot });
+  const results = analyzeDeps(index, 'src');
+
+  assert.equal(results.importers.length, 2);
+  assert.deepEqual(results.importers.map(item => item.from.relativePath).sort(), ['outside/one.ts', 'outside/two.ts']);
+  assert.deepEqual(results.importers.map(item => item.to?.relativePath).sort(), ['src/a.ts', 'src/a.ts']);
 });

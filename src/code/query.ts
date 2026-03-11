@@ -289,23 +289,13 @@ export function analyzeDeps(index: CodebaseIndex, target: string): DependencyAna
     }
   }
 
-  const dedup = (matches: RelationMatch[]) => {
-    const seen = new Set<string>();
-    return matches.filter(match => {
-      const key = `${match.edge.specifier ?? match.edge.targetName ?? ''}::${match.edge.importKind ?? ''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  };
-
   return {
     target,
     targetFile: localFile,
-    importers: isDirectory ? dedup(importers) : importers,
-    localImports: isDirectory ? dedup(localImports) : localImports,
-    externalImports: isDirectory ? dedup(externalImports) : externalImports,
-    unresolvedImports: isDirectory ? dedup(unresolvedImports) : unresolvedImports,
+    importers,
+    localImports,
+    externalImports,
+    unresolvedImports,
   };
 }
 
