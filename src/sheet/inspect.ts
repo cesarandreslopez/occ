@@ -448,11 +448,11 @@ function mapVisibility(hidden: unknown): SheetVisibility {
   return 'visible';
 }
 
-function getCell(sheet: WorkSheet, row: number, col: number): CellObject | undefined {
+export function getCell(sheet: WorkSheet, row: number, col: number): CellObject | undefined {
   return sheet[XLSX.utils.encode_cell({ r: row, c: col })] as CellObject | undefined;
 }
 
-function renderCell(cell: CellObject | undefined): string {
+export function renderCell(cell: CellObject | undefined): string {
   if (!cell) return '';
   if (typeof cell.w === 'string' && cell.w.trim()) return cell.w.trim();
   if (cell.v instanceof Date) return cell.v.toISOString();
@@ -467,7 +467,7 @@ function renderHeaderName(cell: CellObject | undefined, colIndex: number): strin
   return rendered || XLSX.utils.encode_col(colIndex);
 }
 
-function isNonEmptyCell(cell: CellObject): boolean {
+export function isNonEmptyCell(cell: CellObject): boolean {
   if (cell.f) return true;
   if (cell.t === 'z') return false;
   if (cell.c?.length) return true;
