@@ -1,0 +1,71 @@
+
+> @cesarandreslopez/occ@0.4.0 test
+> npm run build && node --import tsx --test test/**/*.test.ts
+
+
+> @cesarandreslopez/occ@0.4.0 build
+> tsc
+
+✔ buildCodebaseIndex indexes JS/TS and Python fixtures (83.763997ms)
+✔ findByName returns expected class symbol (19.944701ms)
+✔ findContent finds python source matches (14.4008ms)
+✔ analyzeCalls resolves outgoing call from bootstrap (11.948637ms)
+✔ analyzeCallers resolves incoming call to createUser (9.947195ms)
+✔ analyzeCallChain finds bootstrap to formatName path (9.979509ms)
+✔ analyzeCallChain finds path when arguments are in reverse call order (10.65991ms)
+✔ analyzeDeps reports importers and imports for service module (11.665831ms)
+✔ analyzeTree reports inheritance and methods for UserService (7.70804ms)
+✔ JSON payload envelope stays stable for code queries (8.22718ms)
+✔ analyzeCalls resolves imported alias in TypeScript (7.498609ms)
+✔ analyzeCalls resolves this and super method dispatch (8.366554ms)
+✔ analyzeCalls resolves python self method dispatch and aliased imports (11.833861ms)
+✔ receiver-qualified calls stay resolved even when other classes share the same method name (12.698409ms)
+✔ unqualified TypeScript calls become ambiguous when multiple matching definitions exist (7.412692ms)
+✔ python self dispatch stays resolved while unqualified duplicate names become ambiguous (7.666367ms)
+✔ ambiguous relation output includes candidate hints (10.931007ms)
+✔ analyzeCallChain reports blocked ambiguity when path search cannot continue (15.1412ms)
+✔ analyzeCallChain does not report reverse blocked ambiguity for the wrong direction (7.334786ms)
+✔ blocked chain output explains the ambiguity (13.296062ms)
+✔ reverse chain output explains that the match is reversed (9.303648ms)
+✔ analyzeDeps separates local, external, and unresolved TypeScript imports (8.647719ms)
+✔ analyzeDeps separates local, external, and unresolved Python imports (9.375559ms)
+✔ dependency output shows explicit import categories (10.833152ms)
+✔ findByName indexes TypeScript interfaces, type aliases, and enums (8.081536ms)
+✔ analyzeTree shows interface extends interface (12.105651ms)
+✔ analyzeTree shows implements relationship from both directions (9.725904ms)
+✔ inheritance resolution stays specific to classes when interfaces share the same name (12.319774ms)
+✔ analyzeTree prefers classes on name collisions and still allows file disambiguation for interfaces (3.561603ms)
+✔ analyzeDeps aggregates imports for a directory target (7.11799ms)
+✔ directory dependency aggregation preserves repeated external imports from different files (1.860907ms)
+✔ directory dependency aggregation preserves distinct importers for the same internal target (2.821228ms)
+✔ barrel re-exports resolve calls through index files (5.870099ms)
+✔ inspectDocument extracts DOCX metadata and content (83.53654ms)
+✔ inspectDocument extracts structure from structured DOCX (39.958404ms)
+✔ inspectDocument skips structure when includeStructure is false (24.647461ms)
+✔ inspectDocument content preview detects headings (21.972203ms)
+✔ doc inspect JSON payload has correct shape (16.479125ms)
+✔ doc inspect tabular output renders expected sections (40.687078ms)
+✔ CLI doc inspect emits JSON and tabular output (40.639252ms)
+✔ inspectDocument rejects unsupported format (0.578575ms)
+✔ inspectWorkbook captures workbook and sheet preflight signals (32.334495ms)
+✔ inspectWorkbook supports sheet selection and header overrides (9.136062ms)
+✔ sheet inspect JSON payload stays stable (7.974446ms)
+✔ sheet inspect tabular output renders inventory, schema, and sample sections (27.443202ms)
+✔ CLI sheet inspect emits JSON and tabular output (18.164175ms)
+✔ inspectPresentation extracts PPTX metadata and slides (23.72664ms)
+✔ inspectPresentation captures per-slide profiles (3.116442ms)
+✔ inspectPresentation detects risk flags (2.369764ms)
+✔ inspectPresentation filters to specific slide (2.602986ms)
+✔ inspectPresentation rejects out-of-range slide (3.117084ms)
+✔ slide inspect JSON payload has correct shape (1.910254ms)
+✔ slide inspect tabular output renders expected sections (17.004382ms)
+✔ CLI slide inspect emits JSON and tabular output (12.560106ms)
+✔ inspectPresentation rejects unsupported format (0.407625ms)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1840.198088

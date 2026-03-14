@@ -1,0 +1,264 @@
+{
+  "@types/mammoth.d.ts": [],
+  "@types/pdf-parse.d.ts": [],
+  "cli-validation.ts": [],
+  "cli.ts": [
+    "cli-validation.ts",
+    "code/command.ts",
+    "doc/command.ts",
+    "markdown/convert.ts",
+    "output/json.ts",
+    "output/tabular.ts",
+    "output/tree.ts",
+    "parsers/index.ts",
+    "progress.ts",
+    "scc.ts",
+    "sheet/command.ts",
+    "slide/command.ts",
+    "stats.ts",
+    "structure/index.ts",
+    "table/command.ts",
+    "types.ts",
+    "utils.ts",
+    "walker.ts"
+  ],
+  "code/build.ts": [
+    "code/discover.ts",
+    "code/languages.ts",
+    "code/parsers.ts",
+    "code/types.ts"
+  ],
+  "code/command.ts": [
+    "cli-validation.ts",
+    "code/build.ts",
+    "code/output.ts",
+    "code/query.ts",
+    "code/types.ts",
+    "utils.ts"
+  ],
+  "code/discover.ts": [
+    "code/languages.ts"
+  ],
+  "code/languages.ts": [
+    "code/types.ts"
+  ],
+  "code/output.ts": [
+    "code/types.ts",
+    "output/tabular.ts",
+    "utils.ts"
+  ],
+  "code/parsers.ts": [
+    "code/languages.ts",
+    "code/types.ts"
+  ],
+  "code/query.ts": [
+    "code/languages.ts",
+    "code/types.ts"
+  ],
+  "code/types.ts": [],
+  "doc/command.ts": [
+    "cli-validation.ts",
+    "doc/inspect.ts",
+    "doc/output.ts",
+    "doc/types.ts",
+    "inspect/shared.ts",
+    "utils.ts"
+  ],
+  "doc/inspect-docx.ts": [
+    "doc/types.ts",
+    "inspect/shared.ts",
+    "utils.ts"
+  ],
+  "doc/inspect-odt.ts": [
+    "doc/types.ts",
+    "inspect/shared.ts",
+    "utils.ts"
+  ],
+  "doc/inspect-pdf.ts": [
+    "doc/types.ts",
+    "inspect/shared.ts",
+    "utils.ts"
+  ],
+  "doc/inspect.ts": [
+    "doc/inspect-docx.ts",
+    "doc/inspect-odt.ts",
+    "doc/inspect-pdf.ts",
+    "doc/types.ts",
+    "inspect/shared.ts",
+    "markdown/convert.ts",
+    "structure/index.ts",
+    "utils.ts"
+  ],
+  "doc/output.ts": [
+    "doc/types.ts",
+    "output/tabular.ts",
+    "utils.ts"
+  ],
+  "doc/types.ts": [
+    "inspect/shared.ts",
+    "structure/types.ts"
+  ],
+  "inspect/shared.ts": [],
+  "markdown/convert.ts": [
+    "utils.ts"
+  ],
+  "output/json.ts": [
+    "output/tree.ts",
+    "scc.ts",
+    "stats.ts",
+    "utils.ts"
+  ],
+  "output/tabular.ts": [
+    "scc.ts",
+    "stats.ts",
+    "utils.ts"
+  ],
+  "output/tree.ts": [
+    "output/tabular.ts",
+    "structure/types.ts"
+  ],
+  "parsers/docx.ts": [
+    "types.ts",
+    "utils.ts"
+  ],
+  "parsers/index.ts": [
+    "parsers/docx.ts",
+    "parsers/odf.ts",
+    "parsers/pdf.ts",
+    "parsers/pptx.ts",
+    "parsers/xlsx.ts",
+    "types.ts",
+    "utils.ts"
+  ],
+  "parsers/odf.ts": [
+    "types.ts",
+    "utils.ts"
+  ],
+  "parsers/pdf.ts": [
+    "types.ts",
+    "utils.ts"
+  ],
+  "parsers/pptx.ts": [
+    "types.ts",
+    "utils.ts"
+  ],
+  "parsers/xlsx.ts": [
+    "types.ts"
+  ],
+  "progress.ts": [],
+  "scc.ts": [
+    "utils.ts"
+  ],
+  "sheet/command.ts": [
+    "cli-validation.ts",
+    "sheet/inspect.ts",
+    "sheet/output.ts",
+    "sheet/types.ts",
+    "utils.ts"
+  ],
+  "sheet/inspect.ts": [
+    "inspect/shared.ts",
+    "sheet/types.ts"
+  ],
+  "sheet/output.ts": [
+    "output/tabular.ts",
+    "sheet/types.ts",
+    "utils.ts"
+  ],
+  "sheet/types.ts": [],
+  "slide/command.ts": [
+    "cli-validation.ts",
+    "inspect/shared.ts",
+    "slide/inspect.ts",
+    "slide/output.ts",
+    "slide/types.ts",
+    "utils.ts"
+  ],
+  "slide/inspect-odp.ts": [
+    "inspect/shared.ts",
+    "slide/types.ts",
+    "utils.ts"
+  ],
+  "slide/inspect-pptx.ts": [
+    "inspect/shared.ts",
+    "slide/types.ts",
+    "utils.ts"
+  ],
+  "slide/inspect.ts": [
+    "inspect/shared.ts",
+    "slide/inspect-odp.ts",
+    "slide/inspect-pptx.ts",
+    "slide/types.ts",
+    "utils.ts"
+  ],
+  "slide/output.ts": [
+    "output/tabular.ts",
+    "slide/types.ts",
+    "utils.ts"
+  ],
+  "slide/types.ts": [
+    "inspect/shared.ts"
+  ],
+  "stats.ts": [
+    "types.ts",
+    "utils.ts"
+  ],
+  "structure/extract.ts": [
+    "structure/types.ts"
+  ],
+  "structure/index.ts": [
+    "structure/extract.ts",
+    "structure/types.ts"
+  ],
+  "structure/types.ts": [],
+  "table/command.ts": [
+    "cli-validation.ts",
+    "inspect/shared.ts",
+    "table/inspect.ts",
+    "table/output.ts",
+    "table/types.ts",
+    "utils.ts"
+  ],
+  "table/inspect-docx.ts": [
+    "inspect/shared.ts",
+    "table/types.ts"
+  ],
+  "table/inspect-odp.ts": [
+    "inspect/shared.ts",
+    "table/types.ts"
+  ],
+  "table/inspect-odt.ts": [
+    "inspect/shared.ts",
+    "table/types.ts"
+  ],
+  "table/inspect-pptx.ts": [
+    "inspect/shared.ts",
+    "table/types.ts"
+  ],
+  "table/inspect-xlsx.ts": [
+    "inspect/shared.ts",
+    "sheet/inspect.ts",
+    "table/types.ts"
+  ],
+  "table/inspect.ts": [
+    "table/inspect-docx.ts",
+    "table/inspect-odp.ts",
+    "table/inspect-odt.ts",
+    "table/inspect-pptx.ts",
+    "table/inspect-xlsx.ts",
+    "table/types.ts",
+    "utils.ts"
+  ],
+  "table/output.ts": [
+    "output/tabular.ts",
+    "table/types.ts",
+    "utils.ts"
+  ],
+  "table/types.ts": [],
+  "types.ts": [],
+  "utils.ts": [],
+  "walker.ts": [
+    "types.ts",
+    "utils.ts"
+  ]
+}

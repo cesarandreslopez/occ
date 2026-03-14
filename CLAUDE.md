@@ -90,6 +90,34 @@ bin/occ.ts → src/cli.ts (orchestrator)
 - **Zod validation**: Options and data structures are validated with Zod schemas (defined alongside their types). CLI option schemas live in the relevant command files; shared validation helpers are in `src/cli-validation.ts`.
 - **Testing**: Uses Node.js built-in `node:test` runner with `node:assert/strict`. Tests import source `.ts` files directly via `tsx`. Test fixtures live in `test/fixtures/`.
 
+## Refactoring Status
+
+Currently in **Phase 2** of a modular TypeScript refactoring. See `specs/refactor/` for all plans and progress.
+
+### Module Map (Current → Target)
+
+The existing directory structure IS the target architecture. No files move between directories. The 7 logical modules are:
+
+| Module | Layer | Current Location |
+|--------|-------|------------------|
+| `shared` | 0 | `src/types.ts`, `src/utils.ts`, `src/@types/` |
+| `pipeline` | 1 | `src/walker.ts`, `src/parsers/`, `src/stats.ts`, `src/scc.ts`, `src/progress.ts`, `src/cli-validation.ts` |
+| `content` | 1 | `src/markdown/`, `src/structure/`, `src/inspect/` |
+| `output` | 2 | `src/output/` |
+| `code` | 3 | `src/code/` |
+| `inspect-commands` | 3 | `src/doc/`, `src/sheet/`, `src/slide/`, `src/table/` |
+| `cli` | 4 | `src/cli.ts` |
+
+### Rules
+
+- Every PR must be under ~300 lines changed (excluding tests)
+- `npx tsc --noEmit` must pass after every commit
+- `npm test` must pass after every commit
+- `node scripts/check-imports.mjs` must pass (DAG enforcement)
+- `npx madge --circular --extensions ts,tsx src/` must show no cycles
+- No new `any` types
+- Re-exports follow the pattern in `specs/refactor/re-export-template.md`
+
 ## Verification
 
 - Run `node dist/bin/occ.js test/fixtures/` to verify document scanning works
