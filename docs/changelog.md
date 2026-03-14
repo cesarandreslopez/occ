@@ -6,6 +6,19 @@ All notable changes to this project will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-03-14
+
+### Added
+
+- Barrel re-export resolution: `occ code analyze calls/callers/chain` now resolves call targets through `index.ts` barrel files
+- Zod runtime schema validation across all CLI options and data types (parsers, walker, stats, output, structure, and all inspect commands)
+
+### Changed
+
+- Enable `noImplicitReturns` and `noFallthroughCasesInSwitch` TypeScript compiler options for stricter type safety
+- Extract shared XLSX cell utilities to `src/inspect/xlsx-cells.ts`
+- Remove deprecated re-export shim from `src/sheet/inspect.ts`
+
 ## [0.4.0] - 2026-03-13
 
 > **Note:** All features in OCC are currently experimental. This project cannot be considered stable software yet. APIs, output formats, and command interfaces may change between minor versions.
@@ -122,6 +135,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Progress bar with ETA
 - Auto-download of scc binary during `npm install` (skip with `SCC_SKIP_DOWNLOAD=1`)
 
+[0.4.1]: https://github.com/cesarandreslopez/occ/releases/tag/v0.4.1
 [0.4.0]: https://github.com/cesarandreslopez/occ/releases/tag/v0.4.0
 [0.3.1]: https://github.com/cesarandreslopez/occ/releases/tag/v0.3.1
 [0.3.0]: https://github.com/cesarandreslopez/occ/releases/tag/v0.3.0

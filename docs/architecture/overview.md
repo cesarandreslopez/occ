@@ -149,8 +149,12 @@ occ/
 │   │   ├── inspect-odp.ts  # ODP table extraction from content.xml
 │   │   ├── output.ts       # Tabular + JSON formatting
 │   │   └── types.ts        # Table extraction types
+│   ├── inspect/
+│   │   ├── shared.ts       # Shared inspect utilities (properties, tokens, payloads)
+│   │   └── xlsx-cells.ts   # Shared XLSX cell utilities (getCell, renderCell, isNonEmptyCell)
 │   ├── stats.ts            # Aggregation, sorting, column detection
 │   ├── scc.ts              # Finds/invokes vendored or PATH scc binary
+│   ├── cli-validation.ts   # Shared Zod schemas for CLI option validation
 │   ├── progress.ts         # Progress bar with ETA
 │   ├── utils.ts            # Shared helpers
 │   └── output/
