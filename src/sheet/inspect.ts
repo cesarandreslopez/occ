@@ -454,12 +454,6 @@ function renderHeaderName(cell: CellObject | undefined, colIndex: number): strin
   return rendered || XLSX.utils.encode_col(colIndex);
 }
 
-/**
- * @deprecated Import from '../inspect/xlsx-cells.js' instead.
- * These re-exports will be removed in a future release.
- */
-export { getCell, renderCell, isNonEmptyCell } from '../inspect/xlsx-cells.js';
-
 function inferValueType(cell: CellObject): ColumnValueType {
   if (cell.t === 's') return 'string';
   if (cell.t === 'n') return 'number';
