@@ -28,21 +28,22 @@ import {
 } from './output.js';
 import type { CodeNodeType } from './types.js';
 
-interface CodeCommandOptions {
-  path?: string;
-  format?: string;
-  output?: string;
-  ci?: boolean;
-  file?: string;
-  limit?: string;
-  depth?: string;
-  type?: string;
-  excludeDir?: string;
-  gitignore?: boolean;
-}
+const CodeCommandOptionsSchema = z.object({
+  path: z.string().optional(),
+  format: z.string().optional(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  file: z.string().optional(),
+  limit: z.string().optional(),
+  depth: z.string().optional(),
+  type: z.string().optional(),
+  excludeDir: z.string().optional(),
+  gitignore: z.boolean().optional(),
+}).passthrough();
+type CodeCommandOptions = z.infer<typeof CodeCommandOptionsSchema>;
 
 function getOptions(command: Command): CodeCommandOptions {
-  return command.optsWithGlobals() as CodeCommandOptions;
+  return CodeCommandOptionsSchema.parse(command.optsWithGlobals());
 }
 
 const FINDABLE_TYPES: CodeNodeType[] = ['file', 'module', 'function', 'class', 'interface', 'type-alias', 'enum', 'variable'];

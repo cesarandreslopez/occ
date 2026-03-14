@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
+import { z } from 'zod';
 import { inspectDocument } from './inspect.js';
 import { formatDocInspection, formatDocPayloadJson } from './output.js';
 import { createInspectPayload } from '../inspect/shared.js';
@@ -8,16 +9,17 @@ import { writeStream } from '../utils.js';
 import { parsePositiveInt } from '../cli-validation.js';
 import type { InspectDocOptions, DocInspectPayload } from './types.js';
 
-interface DocCommandOptions {
-  format?: string;
-  output?: string;
-  ci?: boolean;
-  sampleParagraphs?: string;
-  structure?: boolean;
-}
+const DocCommandOptionsSchema = z.object({
+  format: z.string().optional(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  sampleParagraphs: z.string().optional(),
+  structure: z.boolean().optional(),
+}).passthrough();
+type DocCommandOptions = z.infer<typeof DocCommandOptionsSchema>;
 
 function getOptions(command: Command): DocCommandOptions {
-  return command.optsWithGlobals() as DocCommandOptions;
+  return DocCommandOptionsSchema.parse(command.optsWithGlobals());
 }
 
 async function emit(output: string, options: DocCommandOptions) {

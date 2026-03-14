@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
+import { z } from 'zod';
 import { inspectPresentation } from './inspect.js';
 import { formatSlideInspection, formatSlidePayloadJson } from './output.js';
 import { createInspectPayload } from '../inspect/shared.js';
@@ -8,16 +9,17 @@ import { writeStream } from '../utils.js';
 import { parsePositiveInt } from '../cli-validation.js';
 import type { InspectSlideOptions, SlideInspectPayload } from './types.js';
 
-interface SlideCommandOptions {
-  format?: string;
-  output?: string;
-  ci?: boolean;
-  sampleSlides?: string;
-  slide?: string;
-}
+const SlideCommandOptionsSchema = z.object({
+  format: z.string().optional(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  sampleSlides: z.string().optional(),
+  slide: z.string().optional(),
+}).passthrough();
+type SlideCommandOptions = z.infer<typeof SlideCommandOptionsSchema>;
 
 function getOptions(command: Command): SlideCommandOptions {
-  return command.optsWithGlobals() as SlideCommandOptions;
+  return SlideCommandOptionsSchema.parse(command.optsWithGlobals());
 }
 
 async function emit(output: string, options: SlideCommandOptions) {

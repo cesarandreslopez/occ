@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
+import { z } from 'zod';
 import { inspectTables } from './inspect.js';
 import { formatTableInspection, formatTablePayloadJson } from './output.js';
 import { createInspectPayload } from '../inspect/shared.js';
@@ -8,17 +9,18 @@ import { writeStream } from '../utils.js';
 import { parsePositiveInt, parseHeaderRow } from '../cli-validation.js';
 import type { InspectTableOptions, TableInspectPayload } from './types.js';
 
-interface TableCommandOptions {
-  format?: string;
-  output?: string;
-  ci?: boolean;
-  table?: string;
-  sampleRows?: string;
-  headerRow?: string;
-}
+const TableCommandOptionsSchema = z.object({
+  format: z.string().optional(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  table: z.string().optional(),
+  sampleRows: z.string().optional(),
+  headerRow: z.string().optional(),
+}).passthrough();
+type TableCommandOptions = z.infer<typeof TableCommandOptionsSchema>;
 
 function getOptions(command: Command): TableCommandOptions {
-  return command.optsWithGlobals() as TableCommandOptions;
+  return TableCommandOptionsSchema.parse(command.optsWithGlobals());
 }
 
 async function emit(output: string, options: TableCommandOptions) {

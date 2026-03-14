@@ -25,20 +25,21 @@ import type { SccLanguage } from './scc.js';
 import { getExtension, writeStream } from './utils.js';
 import { validateLargeFileLimit } from './cli-validation.js';
 
-interface CliOptions {
-  byFile?: boolean;
-  format: string;
-  includeExt?: string;
-  excludeExt?: string;
-  excludeDir?: string;
-  gitignore: boolean;
-  sort: string;
-  output?: string;
-  ci?: boolean;
-  largeFileLimit: string;
-  code: boolean;
-  structure?: boolean;
-}
+const CliOptionsSchema = z.object({
+  byFile: z.boolean().optional(),
+  format: z.string(),
+  includeExt: z.string().optional(),
+  excludeExt: z.string().optional(),
+  excludeDir: z.string().optional(),
+  gitignore: z.boolean(),
+  sort: z.string(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  largeFileLimit: z.string(),
+  code: z.boolean(),
+  structure: z.boolean().optional(),
+}).passthrough();
+type CliOptions = z.infer<typeof CliOptionsSchema>;
 
 const PackageJsonSchema = z.object({ version: z.string() }).passthrough();
 

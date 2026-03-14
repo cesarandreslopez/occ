@@ -1,24 +1,26 @@
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
+import { z } from 'zod';
 import { inspectWorkbook, createSheetPayload } from './inspect.js';
 import { formatSheetInspection, formatSheetPayloadJson } from './output.js';
 import { writeStream } from '../utils.js';
 import { parsePositiveInt, parseHeaderRow } from '../cli-validation.js';
 import type { InspectSheetOptions } from './types.js';
 
-interface SheetCommandOptions {
-  format?: string;
-  output?: string;
-  ci?: boolean;
-  sheet?: string;
-  sampleRows?: string;
-  headerRow?: string;
-  maxColumns?: string;
-}
+const SheetCommandOptionsSchema = z.object({
+  format: z.string().optional(),
+  output: z.string().optional(),
+  ci: z.boolean().optional(),
+  sheet: z.string().optional(),
+  sampleRows: z.string().optional(),
+  headerRow: z.string().optional(),
+  maxColumns: z.string().optional(),
+}).passthrough();
+type SheetCommandOptions = z.infer<typeof SheetCommandOptionsSchema>;
 
 function getOptions(command: Command): SheetCommandOptions {
-  return command.optsWithGlobals() as SheetCommandOptions;
+  return SheetCommandOptionsSchema.parse(command.optsWithGlobals());
 }
 
 async function emit(output: string, options: SheetCommandOptions) {

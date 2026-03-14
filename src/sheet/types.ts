@@ -1,128 +1,146 @@
-export type SheetVisibility = 'visible' | 'hidden' | 'very_hidden';
-export type HeaderSelectionMode = 'auto' | 'none' | 'explicit';
-export type ColumnValueType = 'string' | 'number' | 'boolean' | 'date' | 'error' | 'blank_stub' | 'unknown';
+import { z } from 'zod';
 
-export interface InspectSheetOptions {
-  sheet?: string;
-  sampleRows: number;
-  headerRow: 'auto' | 'none' | number;
-  maxColumns: number;
-}
+export const SheetVisibilitySchema = z.enum(['visible', 'hidden', 'very_hidden']);
+export type SheetVisibility = z.infer<typeof SheetVisibilitySchema>;
 
-export interface DefinedNameInfo {
-  name: string;
-  ref: string;
-  scope: 'workbook' | 'sheet';
-  sheetIndex?: number;
-  sheetName?: string;
-  external: boolean;
-}
+export const HeaderSelectionModeSchema = z.enum(['auto', 'none', 'explicit']);
+export type HeaderSelectionMode = z.infer<typeof HeaderSelectionModeSchema>;
 
-export interface WorkbookProperties {
-  title?: string;
-  subject?: string;
-  author?: string;
-  company?: string;
-  manager?: string;
-  createdDate?: string;
-  modifiedDate?: string;
-}
+export const ColumnValueTypeSchema = z.enum(['string', 'number', 'boolean', 'date', 'error', 'blank_stub', 'unknown']);
+export type ColumnValueType = z.infer<typeof ColumnValueTypeSchema>;
 
-export interface WorkbookRiskFlags {
-  hiddenSheets: boolean;
-  formulas: boolean;
-  comments: boolean;
-  hyperlinks: boolean;
-  mergedCells: boolean;
-  protectedSheets: boolean;
-  externalFormulaRefs: boolean;
-}
+export const InspectSheetOptionsSchema = z.object({
+  sheet: z.string().optional(),
+  sampleRows: z.number(),
+  headerRow: z.union([z.literal('auto'), z.literal('none'), z.number()]),
+  maxColumns: z.number(),
+});
+export type InspectSheetOptions = z.infer<typeof InspectSheetOptionsSchema>;
 
-export interface CellTypeCounts {
-  string: number;
-  number: number;
-  boolean: number;
-  date: number;
-  error: number;
-  blankStub: number;
-}
+export const DefinedNameInfoSchema = z.object({
+  name: z.string(),
+  ref: z.string(),
+  scope: z.enum(['workbook', 'sheet']),
+  sheetIndex: z.number().optional(),
+  sheetName: z.string().optional(),
+  external: z.boolean(),
+});
+export type DefinedNameInfo = z.infer<typeof DefinedNameInfoSchema>;
 
-export interface ColumnProfile {
-  index: number;
-  letter: string;
-  name: string;
-  dominantType: ColumnValueType;
-  nonEmptyCount: number;
-  nonEmptyRatio: number;
-  examples: string[];
-}
+export const WorkbookPropertiesSchema = z.object({
+  title: z.string().optional(),
+  subject: z.string().optional(),
+  author: z.string().optional(),
+  company: z.string().optional(),
+  manager: z.string().optional(),
+  createdDate: z.string().optional(),
+  modifiedDate: z.string().optional(),
+});
+export type WorkbookProperties = z.infer<typeof WorkbookPropertiesSchema>;
 
-export interface SampleRow {
-  rowNumber: number;
-  values: Record<string, string>;
-}
+export const WorkbookRiskFlagsSchema = z.object({
+  hiddenSheets: z.boolean(),
+  formulas: z.boolean(),
+  comments: z.boolean(),
+  hyperlinks: z.boolean(),
+  mergedCells: z.boolean(),
+  protectedSheets: z.boolean(),
+  externalFormulaRefs: z.boolean(),
+});
+export type WorkbookRiskFlags = z.infer<typeof WorkbookRiskFlagsSchema>;
 
-export interface SheetProfile {
-  index: number;
-  name: string;
-  visibility: SheetVisibility;
-  usedRange: string | null;
-  totalRows: number;
-  totalCols: number;
-  rectangularRangeCellCount: number;
-  nonEmptyCellCount: number;
-  cellTypeCounts: CellTypeCounts;
-  formulaCellCount: number;
-  commentCellCount: number;
-  hyperlinkCellCount: number;
-  mergedRangeCount: number;
-  hiddenRowCount: number;
-  hiddenColumnCount: number;
-  autoFilterRef: string | null;
-  protected: boolean;
-  definedNames: DefinedNameInfo[];
-  externalFormulaRefCount: number;
-  headerSelection: {
-    requested: 'auto' | 'none' | number;
-    mode: HeaderSelectionMode;
-    rowNumber: number | null;
-  };
-  schema: {
-    truncated: boolean;
-    columns: ColumnProfile[];
-  };
-  sample: {
-    truncatedRows: boolean;
-    truncatedColumns: boolean;
-    rows: SampleRow[];
-  };
-  sampleTokenEstimate: number;
-  fullTokenEstimate: number;
-  estimateMethod: 'full_scan';
-}
+export const CellTypeCountsSchema = z.object({
+  string: z.number(),
+  number: z.number(),
+  boolean: z.number(),
+  date: z.number(),
+  error: z.number(),
+  blankStub: z.number(),
+});
+export type CellTypeCounts = z.infer<typeof CellTypeCountsSchema>;
 
-export interface WorkbookInspection {
-  file: string;
-  format: 'xlsx';
-  size: number;
-  properties: WorkbookProperties;
-  customPropertyCount: number;
-  customProperties: Record<string, unknown>;
-  sheetCount: number;
-  visibleSheetCount: number;
-  hiddenSheetCount: number;
-  veryHiddenSheetCount: number;
-  definedNames: DefinedNameInfo[];
-  riskFlags: WorkbookRiskFlags;
-}
+export const ColumnProfileSchema = z.object({
+  index: z.number(),
+  letter: z.string(),
+  name: z.string(),
+  dominantType: ColumnValueTypeSchema,
+  nonEmptyCount: z.number(),
+  nonEmptyRatio: z.number(),
+  examples: z.array(z.string()),
+});
+export type ColumnProfile = z.infer<typeof ColumnProfileSchema>;
 
-export interface SheetInspectionResult {
-  workbook: WorkbookInspection;
-  sheets: SheetProfile[];
-}
+export const SampleRowSchema = z.object({
+  rowNumber: z.number(),
+  values: z.record(z.string(), z.string()),
+});
+export type SampleRow = z.infer<typeof SampleRowSchema>;
 
-export interface SheetInspectPayload {
-  file: string;
-  query: Record<string, unknown>;
-  results: SheetInspectionResult;
-}
+export const SheetProfileSchema = z.object({
+  index: z.number(),
+  name: z.string(),
+  visibility: SheetVisibilitySchema,
+  usedRange: z.string().nullable(),
+  totalRows: z.number(),
+  totalCols: z.number(),
+  rectangularRangeCellCount: z.number(),
+  nonEmptyCellCount: z.number(),
+  cellTypeCounts: CellTypeCountsSchema,
+  formulaCellCount: z.number(),
+  commentCellCount: z.number(),
+  hyperlinkCellCount: z.number(),
+  mergedRangeCount: z.number(),
+  hiddenRowCount: z.number(),
+  hiddenColumnCount: z.number(),
+  autoFilterRef: z.string().nullable(),
+  protected: z.boolean(),
+  definedNames: z.array(DefinedNameInfoSchema),
+  externalFormulaRefCount: z.number(),
+  headerSelection: z.object({
+    requested: z.union([z.literal('auto'), z.literal('none'), z.number()]),
+    mode: HeaderSelectionModeSchema,
+    rowNumber: z.number().nullable(),
+  }),
+  schema: z.object({
+    truncated: z.boolean(),
+    columns: z.array(ColumnProfileSchema),
+  }),
+  sample: z.object({
+    truncatedRows: z.boolean(),
+    truncatedColumns: z.boolean(),
+    rows: z.array(SampleRowSchema),
+  }),
+  sampleTokenEstimate: z.number(),
+  fullTokenEstimate: z.number(),
+  estimateMethod: z.literal('full_scan'),
+});
+export type SheetProfile = z.infer<typeof SheetProfileSchema>;
+
+export const WorkbookInspectionSchema = z.object({
+  file: z.string(),
+  format: z.literal('xlsx'),
+  size: z.number(),
+  properties: WorkbookPropertiesSchema,
+  customPropertyCount: z.number(),
+  customProperties: z.record(z.string(), z.unknown()),
+  sheetCount: z.number(),
+  visibleSheetCount: z.number(),
+  hiddenSheetCount: z.number(),
+  veryHiddenSheetCount: z.number(),
+  definedNames: z.array(DefinedNameInfoSchema),
+  riskFlags: WorkbookRiskFlagsSchema,
+});
+export type WorkbookInspection = z.infer<typeof WorkbookInspectionSchema>;
+
+export const SheetInspectionResultSchema = z.object({
+  workbook: WorkbookInspectionSchema,
+  sheets: z.array(SheetProfileSchema),
+});
+export type SheetInspectionResult = z.infer<typeof SheetInspectionResultSchema>;
+
+export const SheetInspectPayloadSchema = z.object({
+  file: z.string(),
+  query: z.record(z.string(), z.unknown()),
+  results: SheetInspectionResultSchema,
+});
+export type SheetInspectPayload = z.infer<typeof SheetInspectPayloadSchema>;
