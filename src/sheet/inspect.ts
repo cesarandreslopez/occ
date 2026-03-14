@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import XLSX from 'xlsx';
 import type { CellObject, Range, WorkSheet } from 'xlsx';
 import { estimateTokens, asOptionalString, formatDateLike } from '../inspect/shared.js';
+import { getCell, renderCell, isNonEmptyCell } from '../inspect/xlsx-cells.js';
 import type {
   CellTypeCounts,
   ColumnProfile,
@@ -448,32 +449,16 @@ function mapVisibility(hidden: unknown): SheetVisibility {
   return 'visible';
 }
 
-export function getCell(sheet: WorkSheet, row: number, col: number): CellObject | undefined {
-  return sheet[XLSX.utils.encode_cell({ r: row, c: col })] as CellObject | undefined;
-}
-
-export function renderCell(cell: CellObject | undefined): string {
-  if (!cell) return '';
-  if (typeof cell.w === 'string' && cell.w.trim()) return cell.w.trim();
-  if (cell.v instanceof Date) return cell.v.toISOString();
-  if (cell.t === 'b') return String(Boolean(cell.v));
-  if (cell.t === 'e') return cell.w?.trim() || '#ERROR';
-  if (cell.v == null) return cell.f?.trim() || '';
-  return String(cell.v).trim();
-}
-
 function renderHeaderName(cell: CellObject | undefined, colIndex: number): string {
   const rendered = renderCell(cell);
   return rendered || XLSX.utils.encode_col(colIndex);
 }
 
-export function isNonEmptyCell(cell: CellObject): boolean {
-  if (cell.f) return true;
-  if (cell.t === 'z') return false;
-  if (cell.c?.length) return true;
-  if (cell.l?.Target) return true;
-  return renderCell(cell).length > 0;
-}
+/**
+ * @deprecated Import from '../inspect/xlsx-cells.js' instead.
+ * These re-exports will be removed in a future release.
+ */
+export { getCell, renderCell, isNonEmptyCell } from '../inspect/xlsx-cells.js';
 
 function inferValueType(cell: CellObject): ColumnValueType {
   if (cell.t === 's') return 'string';

@@ -1,6 +1,6 @@
 import XLSX from 'xlsx';
 import type { CellObject, WorkSheet } from 'xlsx';
-import { getCell, renderCell, isNonEmptyCell } from '../sheet/inspect.js';
+import { getCell, renderCell, isNonEmptyCell } from '../inspect/xlsx-cells.js';
 import { estimateTokens } from '../inspect/shared.js';
 import type { ExtractedTable, InspectTableOptions, TableCell } from './types.js';
 
