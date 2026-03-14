@@ -1,9 +1,25 @@
-export interface PageMapping {
-  pageNumber: number;
-  startChar: number;
-  endChar: number;
-}
+import { z } from 'zod';
 
+export const PageMappingSchema = z.object({
+  pageNumber: z.number(),
+  startChar: z.number(),
+  endChar: z.number(),
+});
+export type PageMapping = z.infer<typeof PageMappingSchema>;
+
+export const StructureNodeSchema: z.ZodType<StructureNode> = z.object({
+  nodeId: z.string(),
+  title: z.string(),
+  level: z.number(),
+  startChar: z.number(),
+  endChar: z.number(),
+  startLine: z.number(),
+  startPage: z.number().optional(),
+  endPage: z.number().optional(),
+  parentNodeId: z.string().optional(),
+  structureCode: z.string().optional(),
+  children: z.lazy(() => z.array(StructureNodeSchema)),
+});
 export interface StructureNode {
   nodeId: string;
   title: string;
@@ -18,12 +34,13 @@ export interface StructureNode {
   children: StructureNode[];
 }
 
-export interface DocumentStructure {
-  rootNodes: StructureNode[];
-  pageMappings: PageMapping[];
-  totalNodes: number;
-  maxDepth: number;
-}
+export const DocumentStructureSchema = z.object({
+  rootNodes: z.array(StructureNodeSchema),
+  pageMappings: z.array(PageMappingSchema),
+  totalNodes: z.number(),
+  maxDepth: z.number(),
+});
+export type DocumentStructure = z.infer<typeof DocumentStructureSchema>;
 
 export function flatten(nodes: StructureNode[]): StructureNode[] {
   const result: StructureNode[] = [];
@@ -76,25 +93,5 @@ export function toDict(structure: DocumentStructure): Record<string, unknown> {
 }
 
 export function fromDict(data: Record<string, unknown>): DocumentStructure {
-  function nodeFromDict(d: Record<string, unknown>): StructureNode {
-    return {
-      nodeId: d.nodeId as string,
-      title: d.title as string,
-      level: d.level as number,
-      startChar: d.startChar as number,
-      endChar: d.endChar as number,
-      startLine: d.startLine as number,
-      startPage: d.startPage as number | undefined,
-      endPage: d.endPage as number | undefined,
-      parentNodeId: d.parentNodeId as string | undefined,
-      structureCode: d.structureCode as string | undefined,
-      children: (d.children as Record<string, unknown>[]).map(nodeFromDict),
-    };
-  }
-  return {
-    rootNodes: (data.rootNodes as Record<string, unknown>[]).map(nodeFromDict),
-    pageMappings: data.pageMappings as PageMapping[],
-    totalNodes: data.totalNodes as number,
-    maxDepth: data.maxDepth as number,
-  };
+  return DocumentStructureSchema.parse(data);
 }

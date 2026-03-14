@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import JSZip from 'jszip';
 import officeparser from 'officeparser';
+import { z } from 'zod';
 import { countWords, getExtension } from '../utils.js';
 import type { ParserOutput } from '../types.js';
 
@@ -17,7 +18,7 @@ export async function parseOdf(filePath: string): Promise<ParserOutput> {
 }
 
 async function parseOdt(filePath: string): Promise<ParserOutput> {
-  const text = await officeparser.parseOffice(filePath) as unknown as string;
+  const text = z.string().parse(await officeparser.parseOffice(filePath));
   const words = countWords(text);
   const paragraphs = text.split(/\n+/).filter((s: string) => s.trim().length > 0).length;
   const pages = Math.max(1, Math.ceil(words / 250));
@@ -37,7 +38,7 @@ async function parseOds(buffer: Buffer): Promise<ParserOutput> {
   const rows = (contentXml.match(/<table:table-row/g) || []).length;
 
   // Use officeparser with buffer to avoid re-reading from disk
-  const text = await officeparser.parseOffice(buffer) as unknown as string;
+  const text = z.string().parse(await officeparser.parseOffice(buffer));
   const cells = text.split(/\n/).filter((s: string) => s.trim().length > 0).length;
 
   return {
@@ -53,7 +54,7 @@ async function parseOdp(buffer: Buffer): Promise<ParserOutput> {
 
   const slides = (contentXml.match(/<draw:page /g) || []).length;
 
-  const text = await officeparser.parseOffice(buffer) as unknown as string;
+  const text = z.string().parse(await officeparser.parseOffice(buffer));
   const words = countWords(text);
 
   return {

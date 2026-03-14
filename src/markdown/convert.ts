@@ -4,9 +4,11 @@ import pdf from 'pdf-parse';
 import JSZip from 'jszip';
 import officeparser from 'officeparser';
 import TurndownService from 'turndown';
+import { z } from 'zod';
 import { getExtension } from '../utils.js';
 
 const turndown = new TurndownService({ headingStyle: 'atx' });
+const PdfTextContentSchema = z.object({ items: z.array(z.object({ str: z.string() }).passthrough()) });
 
 /** Convert a DOCX file to markdown via mammoth → HTML → turndown */
 async function docxToMarkdown(filePath: string): Promise<string> {
@@ -33,7 +35,7 @@ async function pdfToMarkdown(filePath: string): Promise<string> {
   try {
     data = await pdf(buffer, {
       pagerender: async (pageData: { pageIndex: number; getTextContent: () => Promise<unknown> }) => {
-        const textContent = await pageData.getTextContent() as { items: Array<{ str: string }> };
+        const textContent = PdfTextContentSchema.parse(await pageData.getTextContent());
         const strings = textContent.items.map(item => item.str);
         return `[Page ${pageData.pageIndex + 1}]\n${strings.join(' ')}`;
       },
@@ -60,7 +62,7 @@ async function pptxToMarkdown(filePath: string): Promise<string> {
     });
 
   // Get full text via officeparser
-  const fullText = await officeparser.parseOffice(buffer) as unknown as string;
+  const fullText = z.string().parse(await officeparser.parseOffice(buffer));
   const slideCount = slideFiles.length;
 
   if (slideCount <= 1) {
@@ -84,7 +86,7 @@ async function pptxToMarkdown(filePath: string): Promise<string> {
 
 /** Convert an ODT file to markdown (best-effort heading detection) */
 async function odtToMarkdown(filePath: string): Promise<string> {
-  const text = await officeparser.parseOffice(filePath) as unknown as string;
+  const text = z.string().parse(await officeparser.parseOffice(filePath));
   return text;
 }
 
@@ -96,7 +98,7 @@ async function odpToMarkdown(filePath: string): Promise<string> {
   if (!contentXml) return '';
 
   const slides = (contentXml.match(/<draw:page /g) || []).length;
-  const text = await officeparser.parseOffice(buffer) as unknown as string;
+  const text = z.string().parse(await officeparser.parseOffice(buffer));
 
   if (slides <= 1) {
     return `# Slide 1\n\n${text}`;

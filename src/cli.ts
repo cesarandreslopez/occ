@@ -2,6 +2,7 @@ import { Command, Option } from 'commander';
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { z } from 'zod';
 import { findFiles } from './walker.js';
 import { parseFiles } from './parsers/index.js';
 import { aggregate } from './stats.js';
@@ -39,11 +40,13 @@ interface CliOptions {
   structure?: boolean;
 }
 
+const PackageJsonSchema = z.object({ version: z.string() }).passthrough();
+
 // Find package.json — works from both src/ (dev) and dist/src/ (built)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 async function loadPkg() {
   for (const rel of ['..', '../..']) {
-    try { return JSON.parse(await readFile(path.resolve(__dirname, rel, 'package.json'), 'utf8')); }
+    try { return PackageJsonSchema.parse(JSON.parse(await readFile(path.resolve(__dirname, rel, 'package.json'), 'utf8'))); }
     catch { /* try next */ }
   }
   return { version: '0.0.0' };

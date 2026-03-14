@@ -1,5 +1,6 @@
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { z } from 'zod';
 import { getExtension } from '../utils.js';
 import { extractDocxTables } from './inspect-docx.js';
 import { extractXlsxTables } from './inspect-xlsx.js';
@@ -8,7 +9,8 @@ import { extractOdtTables } from './inspect-odt.js';
 import { extractOdpTables } from './inspect-odp.js';
 import type { InspectTableOptions, TableInspectionResult } from './types.js';
 
-const SUPPORTED_FORMATS = new Set(['docx', 'xlsx', 'pptx', 'odt', 'odp', 'pdf']);
+const TableFormatSchema = z.enum(['docx', 'xlsx', 'pptx', 'odt', 'odp', 'pdf']);
+const SUPPORTED_FORMATS: ReadonlySet<string> = new Set(TableFormatSchema.options);
 
 export async function inspectTables(filePath: string, options: InspectTableOptions): Promise<TableInspectionResult> {
   const resolvedPath = path.resolve(filePath);
@@ -19,7 +21,7 @@ export async function inspectTables(filePath: string, options: InspectTableOptio
   }
 
   const fileStats = await stat(resolvedPath);
-  const format = ext as TableInspectionResult['format'];
+  const format = TableFormatSchema.parse(ext);
 
   if (format === 'pdf') {
     return {
