@@ -49,7 +49,9 @@ bin/occ.ts → src/cli.ts (orchestrator)
                │    ├→ types.ts          — StructureNode, DocumentStructure, PageMapping
                │    ├→ extract.ts        — header extraction + tree building
                │    └→ index.ts          — re-exports
-               ├→ src/inspect/shared.ts  — shared inspect utilities (properties, tokens, payloads)
+               ├→ src/inspect/
+               │    ├→ shared.ts         — shared inspect utilities (properties, tokens, payloads)
+               │    └→ xlsx-cells.ts     — shared XLSX cell utilities (getCell, renderCell, isNonEmptyCell)
                ├→ src/doc/command.ts     — `occ doc inspect` for DOCX/ODT/PDF
                ├→ src/sheet/command.ts   — `occ sheet inspect` for XLSX
                ├→ src/slide/command.ts   — `occ slide inspect` for PPTX/ODP

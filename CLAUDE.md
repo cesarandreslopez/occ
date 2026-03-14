@@ -49,7 +49,9 @@ bin/occ.ts → src/cli.ts (orchestrator)
                │    ├→ types.ts          — StructureNode, DocumentStructure, PageMapping
                │    ├→ extract.ts        — header extraction + tree building
                │    └→ index.ts          — re-exports
-               ├→ src/inspect/shared.ts  — shared inspect utilities (properties, tokens, payloads)
+               ├→ src/inspect/
+               │    ├→ shared.ts         — shared inspect utilities (properties, tokens, payloads)
+               │    └→ xlsx-cells.ts     — shared XLSX cell utilities (getCell, renderCell, isNonEmptyCell)
                ├→ src/doc/command.ts     — `occ doc inspect` for DOCX/ODT/PDF
                ├→ src/sheet/command.ts   — `occ sheet inspect` for XLSX
                ├→ src/slide/command.ts   — `occ slide inspect` for PPTX/ODP
@@ -90,40 +92,44 @@ bin/occ.ts → src/cli.ts (orchestrator)
 - **Zod validation**: Options and data structures are validated with Zod schemas (defined alongside their types). CLI option schemas live in the relevant command files; shared validation helpers are in `src/cli-validation.ts`.
 - **Testing**: Uses Node.js built-in `node:test` runner with `node:assert/strict`. Tests import source `.ts` files directly via `tsx`. Test fixtures live in `test/fixtures/`.
 
-## Refactoring Status
+## Module Architecture
 
-**Phase 3 complete** — modular TypeScript refactoring. See `specs/refactor/` for architecture, `specs/*/progress.md` for per-module status.
+The codebase follows a 5-layer dependency DAG enforced by `scripts/check-imports.mjs`. All dependencies flow downward; no upward or peer-level cross-dependencies exist.
 
-### Module Map
+| Module | Layer | Location |
+|--------|-------|----------|
+| `shared` | 0 | `src/types.ts`, `src/utils.ts`, `src/@types/` |
+| `pipeline` | 1 | `src/walker.ts`, `src/parsers/`, `src/stats.ts`, `src/scc.ts`, `src/progress.ts`, `src/cli-validation.ts` |
+| `content` | 1 | `src/markdown/`, `src/structure/`, `src/inspect/` |
+| `output` | 2 | `src/output/` |
+| `code` | 3 | `src/code/` |
+| `inspect-commands` | 3 | `src/doc/`, `src/sheet/`, `src/slide/`, `src/table/` |
+| `cli` | 4 | `src/cli.ts` |
 
-The existing directory structure IS the target architecture. All 7 modules extracted and verified:
+```
+Layer 4:  cli
+           │
+           ├──────────────────────────────┐
+           │                              │
+Layer 3:  code                     inspect-commands
+           │                         │    │
+           ├─── output ◄─────────────┘    │
+           │      │                       │
+Layer 2:   │      ├── pipeline ◄──────────┤
+           │      │      │                │
+Layer 1:   │      └── content ◄───────────┘
+           │             │
+Layer 0:   └──────── shared ◄─────────────────
+```
 
-| Module | Layer | Location | Status |
-|--------|-------|----------|--------|
-| `shared` | 0 | `src/types.ts`, `src/utils.ts`, `src/@types/` | Done |
-| `pipeline` | 1 | `src/walker.ts`, `src/parsers/`, `src/stats.ts`, `src/scc.ts`, `src/progress.ts`, `src/cli-validation.ts` | Done |
-| `content` | 1 | `src/markdown/`, `src/structure/`, `src/inspect/` | Done |
-| `output` | 2 | `src/output/` | Done |
-| `code` | 3 | `src/code/` | Done |
-| `inspect-commands` | 3 | `src/doc/`, `src/sheet/`, `src/slide/`, `src/table/` | Done |
-| `cli` | 4 | `src/cli.ts` | Done |
+### Architectural invariants
 
-### Key Changes in Phase 3
-
-- Extracted `getCell`, `renderCell`, `isNonEmptyCell` from `sheet/inspect.ts` to `inspect/xlsx-cells.ts` (Decision D3)
-- Eliminated `table→sheet` cross-domain dependency
-- Deprecated re-export shim in `sheet/inspect.ts` for backwards compatibility
-- Import DAG linter updated: `table` no longer depends on `sheet`
-
-### Rules
-
-- Every PR must be under ~300 lines changed (excluding tests)
 - `npx tsc --noEmit` must pass after every commit
 - `npm test` must pass after every commit
 - `node scripts/check-imports.mjs` must pass (DAG enforcement)
 - `npx madge --circular --extensions ts,tsx src/` must show no cycles
-- No new `any` types
-- Re-exports follow the pattern in `specs/refactor/re-export-template.md`
+- No `any` types
+- Architecture decisions documented in `specs/_archive/refactor/architecture.md`
 
 ## Verification
 
